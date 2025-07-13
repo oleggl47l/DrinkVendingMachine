@@ -3,8 +3,8 @@
 public class OrderItem
 {
     public int Id { get; set; }
-    public required string DrinkName { get; set; }
-    public required string BrandName { get; set; }
+    public string DrinkName { get; set; } = null!;
+    public string BrandName { get; set; } = null!;
     public int PriceAtPurchase { get; set; }
     public int Quantity { get; set; }
 
