@@ -13,9 +13,18 @@ public abstract class BaseRepository<T>(ApplicationDbContext context) : IReposit
     public virtual async Task<IEnumerable<T>> GetAllAsync(CancellationToken cancellationToken = default) =>
         await _dbSet.AsNoTracking().ToListAsync(cancellationToken);
 
-    public virtual async Task<IEnumerable<T>> GetWhereAsync(Expression<Func<T, bool>> predicate,
-        CancellationToken cancellationToken = default) =>
-        await _dbSet.AsNoTracking().Where(predicate).ToListAsync(cancellationToken);
+    public virtual async Task<IEnumerable<T>> GetWhereAsync(
+        Expression<Func<T, bool>> predicate,
+        Func<IQueryable<T>, IQueryable<T>>? include = null,
+        CancellationToken cancellationToken = default)
+    {
+        var query = _dbSet.AsNoTracking().Where(predicate);
+
+        if (include is not null)
+            query = include(query);
+
+        return await query.ToListAsync(cancellationToken);
+    }
 
     public virtual async Task<T?> GetByIdAsync(int id, CancellationToken cancellationToken = default) =>
         await _dbSet.FindAsync([id], cancellationToken);

@@ -7,6 +7,7 @@ public interface IRepository<T> where T : class
     Task<IEnumerable<T>> GetAllAsync(CancellationToken cancellationToken = default);
 
     Task<IEnumerable<T>> GetWhereAsync(Expression<Func<T, bool>> predicate,
+        Func<IQueryable<T>, IQueryable<T>>? include = null,
         CancellationToken cancellationToken = default);
 
     Task<T?> GetByIdAsync(int id, CancellationToken cancellationToken = default);
