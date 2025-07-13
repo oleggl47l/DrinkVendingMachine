@@ -4,11 +4,11 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DrinkVendingMachine.Api", "
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{118AFD23-0DE9-49EA-A2C5-9FD1FEB06D8E}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DrinkVendingMachine.Application", "DrinkVendingMachine.Application\DrinkVendingMachine.Application.csproj", "{E78E90C5-B763-4507-A185-34FD3086BB60}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DrinkVendingMachine.Application", "src\DrinkVendingMachine.Application\DrinkVendingMachine.Application.csproj", "{E78E90C5-B763-4507-A185-34FD3086BB60}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DrinkVendingMachine.Domain", "DrinkVendingMachine.Domain\DrinkVendingMachine.Domain.csproj", "{5A696F29-B804-45E5-9065-2282B89509D3}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DrinkVendingMachine.Domain", "src\DrinkVendingMachine.Domain\DrinkVendingMachine.Domain.csproj", "{5A696F29-B804-45E5-9065-2282B89509D3}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DrinkVendingMachine.Infrastructure", "DrinkVendingMachine.Infrastructure\DrinkVendingMachine.Infrastructure.csproj", "{6DB4F88C-105A-4FF3-B262-1ED86274A849}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DrinkVendingMachine.Infrastructure", "src\DrinkVendingMachine.Infrastructure\DrinkVendingMachine.Infrastructure.csproj", "{6DB4F88C-105A-4FF3-B262-1ED86274A849}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

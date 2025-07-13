@@ -17,7 +17,7 @@
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\..\DrinkVendingMachine.Infrastructure\DrinkVendingMachine.Infrastructure.csproj" />
+      <ProjectReference Include="..\DrinkVendingMachine.Infrastructure\DrinkVendingMachine.Infrastructure.csproj" />
     </ItemGroup>
 
 </Project>
