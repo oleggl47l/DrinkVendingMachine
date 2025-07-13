@@ -37,4 +37,7 @@ public abstract class BaseRepository<T>(ApplicationDbContext context) : IReposit
         _dbSet.Remove(entity);
         await Context.SaveChangesAsync(cancellationToken);
     }
+
+    public async Task<bool> ExistsAsync(int id, CancellationToken cancellationToken = default) =>
+        await _dbSet.AnyAsync(e => EF.Property<int>(e, "Id") == id, cancellationToken);
 }
