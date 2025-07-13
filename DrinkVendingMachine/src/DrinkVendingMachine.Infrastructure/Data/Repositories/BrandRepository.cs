@@ -17,10 +17,8 @@ public class BrandRepository(ApplicationDbContext context) : BaseRepository<Bran
             .Include(b => b.Drinks)
             .FirstOrDefaultAsync(b => b.Id == id, cancellationToken: cancellationToken);
 
-    public async Task<bool> IsNameUniqueAsync(string name, int? excludeId = null,
-        CancellationToken cancellationToken = default) =>
+    public async Task<bool> IsNameUniqueAsync(string name, CancellationToken cancellationToken = default) =>
         !await Context.Brands
             .AsNoTracking()
-            .AnyAsync(b => b.Name == name && (!excludeId.HasValue || b.Id != excludeId.Value),
-                cancellationToken: cancellationToken);
+            .AnyAsync(b => b.Name == name, cancellationToken);
 }
