@@ -17,16 +17,6 @@ public class DrinkRepository(ApplicationDbContext context) : BaseRepository<Drin
             .Include(d => d.Brand)
             .FirstOrDefaultAsync(d => d.Id == id, cancellationToken: cancellationToken);
 
-    public async Task UpdateQuantityAsync(int id, int quantity, CancellationToken cancellationToken = default)
-    {
-        var drink = await GetByIdAsync(id, cancellationToken);
-        if (drink != null)
-        {
-            drink.Quantity = quantity;
-            await UpdateAsync(drink, cancellationToken);
-        }
-    }
-
     public async Task<IEnumerable<Drink>> GetByBrandAsync(int brandId, CancellationToken cancellationToken = default) =>
         await Context.Drinks
             .AsNoTracking()
