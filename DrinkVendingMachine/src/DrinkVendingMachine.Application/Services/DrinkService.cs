@@ -1,11 +1,13 @@
 ﻿using DrinkVendingMachine.Application.DTOs.Drink;
 using DrinkVendingMachine.Application.Services.Interfaces;
 using DrinkVendingMachine.Domain.Entities;
+using DrinkVendingMachine.Domain.Exceptions.Brand;
+using DrinkVendingMachine.Domain.Exceptions.Drink;
 using DrinkVendingMachine.Domain.Interfaces;
 
 namespace DrinkVendingMachine.Application.Services;
 
-public class DrinkService(IDrinkRepository drinkRepository) : IDrinkService
+public class DrinkService(IDrinkRepository drinkRepository, IBrandRepository brandRepository) : IDrinkService
 {
     public async Task<List<DrinkModel>> GetAllAsync(CancellationToken cancellationToken)
     {
@@ -15,23 +17,38 @@ public class DrinkService(IDrinkRepository drinkRepository) : IDrinkService
 
     public async Task<DrinkModel?> GetByIdAsync(int id, CancellationToken cancellationToken)
     {
-        var drink = await drinkRepository.GetByIdAsync(id, cancellationToken);
-        return drink is null ? null : MapToModel(drink);
+        var drink = await drinkRepository.GetByIdAsync(id, cancellationToken)
+                    ?? throw new DrinkNotFoundException(id);
+        return MapToModel(drink);
     }
 
     public async Task<List<DrinkModel>> GetByBrandAsync(int brandId, CancellationToken cancellationToken)
     {
-        var drinks = await drinkRepository.GetByBrandAsync(brandId, cancellationToken);
+        var drinks = await drinkRepository.GetByBrandAsync(brandId, cancellationToken) ??
+                     throw new BrandNotFoundException(brandId);
         return drinks.Select(MapToModel).ToList();
     }
 
     public async Task UpdateQuantityAsync(int id, int quantity, CancellationToken cancellationToken)
     {
-        await drinkRepository.UpdateQuantityAsync(id, quantity, cancellationToken);
+        if (quantity <= 0)
+            throw new InvalidDrinkPriceException(quantity);
+
+        var drink = await drinkRepository.GetByIdAsync(id, cancellationToken)
+                    ?? throw new DrinkNotFoundException(id);
+
+        drink.Quantity = quantity;
+        await drinkRepository.UpdateAsync(drink, cancellationToken);
     }
 
     public async Task AddAsync(DrinkCreateModel model, CancellationToken cancellationToken)
     {
+        if (model.Price <= 0)
+            throw new InvalidDrinkPriceException(model.Price);
+
+        if (model.Quantity < 0)
+            throw new InvalidDrinkQuantityException(model.Quantity);
+
         var drink = new Drink
         {
             Name = model.Name,
@@ -46,8 +63,18 @@ public class DrinkService(IDrinkRepository drinkRepository) : IDrinkService
 
     public async Task UpdateAsync(DrinkUpdateModel model, CancellationToken cancellationToken)
     {
-        var existing = await drinkRepository.GetByIdAsync(model.Id, cancellationToken);
-        if (existing is null) return;
+        var existing = await drinkRepository.GetByIdAsync(model.Id, cancellationToken)
+                       ?? throw new DrinkNotFoundException(model.Id);
+
+        if (model.Price is <= 0)
+            throw new InvalidDrinkPriceException(model.Price.Value);
+
+        if (model.Quantity is < 0)
+            throw new InvalidDrinkQuantityException(model.Quantity.Value);
+
+        if (model.BrandId.HasValue &&
+            !await brandRepository.ExistsAsync(model.BrandId.Value, cancellationToken))
+            throw new BrandNotFoundException(model.BrandId.Value);
 
         if (model.Name is not null) existing.Name = model.Name;
         if (model.Price.HasValue) existing.Price = model.Price.Value;
@@ -60,9 +87,10 @@ public class DrinkService(IDrinkRepository drinkRepository) : IDrinkService
 
     public async Task DeleteAsync(int id, CancellationToken cancellationToken)
     {
-        var drink = await drinkRepository.GetByIdAsync(id, cancellationToken);
-        if (drink is not null)
-            await drinkRepository.DeleteAsync(drink, cancellationToken);
+        var drink = await drinkRepository.GetByIdAsync(id, cancellationToken)
+                    ?? throw new DrinkNotFoundException(id);
+
+        await drinkRepository.DeleteAsync(drink, cancellationToken);
     }
 
     private static DrinkModel MapToModel(Drink drink) =>
