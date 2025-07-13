@@ -6,4 +6,13 @@
         <Nullable>enable</Nullable>
     </PropertyGroup>
 
+    <ItemGroup>
+      <ProjectReference Include="..\DrinkVendingMachine.Domain\DrinkVendingMachine.Domain.csproj" />
+      <ProjectReference Include="..\DrinkVendingMachine.Infrastructure\DrinkVendingMachine.Infrastructure.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="9.0.7" />
+    </ItemGroup>
+
 </Project>
