@@ -1,4 +1,5 @@
-﻿using DrinkVendingMachine.Application.DTOs.Drink;
+﻿using DrinkVendingMachine.Application.DTOs.Brand;
+using DrinkVendingMachine.Application.DTOs.Drink;
 
 namespace DrinkVendingMachine.Application.Services.Interfaces;
 
@@ -11,4 +12,5 @@ public interface IDrinkService
     Task AddAsync(DrinkCreateModel model, CancellationToken cancellationToken);
     Task UpdateAsync(DrinkUpdateModel model, CancellationToken cancellationToken);
     Task DeleteAsync(int id, CancellationToken cancellationToken);
+    Task<List<DrinkModel>> GetFilteredAsync(DrinkFilterModel filter, CancellationToken cancellationToken);
 }

@@ -15,6 +15,15 @@ public class DrinkController(IDrinkService drinkService) : ControllerBase
         return Ok(drinks);
     }
 
+    [HttpGet("filter")]
+    public async Task<ActionResult<List<DrinkModel>>> GetFiltered(
+        [FromQuery] DrinkFilterModel filter,
+        CancellationToken cancellationToken)
+    {
+        var drinks = await drinkService.GetFilteredAsync(filter, cancellationToken);
+        return Ok(drinks);
+    }
+
     [HttpGet("{id:int}")]
     public async Task<ActionResult<DrinkModel>> GetById(int id, CancellationToken cancellationToken)
     {

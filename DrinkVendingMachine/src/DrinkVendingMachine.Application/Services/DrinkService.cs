@@ -93,6 +93,14 @@ public class DrinkService(IDrinkRepository drinkRepository, IBrandRepository bra
         await drinkRepository.DeleteAsync(drink, cancellationToken);
     }
 
+    public async Task<List<DrinkModel>> GetFilteredAsync(DrinkFilterModel filter, CancellationToken cancellationToken)
+    {
+        var drinks =
+            await drinkRepository.GetFilteredAsync(filter.BrandId, filter.MinPrice, filter.MaxPrice, cancellationToken);
+        return drinks.Select(MapToModel).ToList();
+    }
+
+
     private static DrinkModel MapToModel(Drink drink) =>
         new(
             drink.Id,

@@ -23,4 +23,24 @@ public class DrinkRepository(ApplicationDbContext context) : BaseRepository<Drin
             .Include(d => d.Brand)
             .Where(d => d.BrandId == brandId)
             .ToListAsync(cancellationToken: cancellationToken);
+
+    public async Task<List<Drink>> GetFilteredAsync(int? brandId, int? minPrice, int? maxPrice,
+        CancellationToken cancellationToken)
+    {
+        var query = Context.Drinks
+            .AsNoTracking()
+            .Include(d => d.Brand)
+            .AsQueryable();
+
+        if (brandId.HasValue)
+            query = query.Where(d => d.BrandId == brandId);
+
+        if (minPrice.HasValue)
+            query = query.Where(d => d.Price >= minPrice.Value);
+
+        if (maxPrice.HasValue)
+            query = query.Where(d => d.Price <= maxPrice.Value);
+
+        return await query.ToListAsync(cancellationToken);
+    }
 }
