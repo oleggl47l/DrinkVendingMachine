@@ -9,9 +9,10 @@ namespace DrinkVendingMachine.Application.Services;
 
 public class DrinkService(IDrinkRepository drinkRepository, IBrandRepository brandRepository) : IDrinkService
 {
-    public async Task<List<DrinkModel>> GetAllAsync(CancellationToken cancellationToken)
+    public async Task<List<DrinkModel>> GetAllAsync(DrinkFilterModel filter, CancellationToken cancellationToken)
     {
-        var drinks = await drinkRepository.GetAllAsync(cancellationToken);
+        var drinks =
+            await drinkRepository.GetFilteredAsync(filter.BrandId, filter.MinPrice, filter.MaxPrice, cancellationToken);
         return drinks.Select(MapToModel).ToList();
     }
 
@@ -92,14 +93,6 @@ public class DrinkService(IDrinkRepository drinkRepository, IBrandRepository bra
 
         await drinkRepository.DeleteAsync(drink, cancellationToken);
     }
-
-    public async Task<List<DrinkModel>> GetFilteredAsync(DrinkFilterModel filter, CancellationToken cancellationToken)
-    {
-        var drinks =
-            await drinkRepository.GetFilteredAsync(filter.BrandId, filter.MinPrice, filter.MaxPrice, cancellationToken);
-        return drinks.Select(MapToModel).ToList();
-    }
-
 
     private static DrinkModel MapToModel(Drink drink) =>
         new(

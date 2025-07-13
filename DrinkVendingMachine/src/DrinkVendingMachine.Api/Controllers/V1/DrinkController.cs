@@ -9,18 +9,10 @@ namespace DrinkVendingMachine.Api.Controllers.V1;
 public class DrinkController(IDrinkService drinkService) : ControllerBase
 {
     [HttpGet]
-    public async Task<ActionResult<List<DrinkModel>>> GetAll(CancellationToken cancellationToken)
-    {
-        var drinks = await drinkService.GetAllAsync(cancellationToken);
-        return Ok(drinks);
-    }
-
-    [HttpGet("filter")]
-    public async Task<ActionResult<List<DrinkModel>>> GetFiltered(
-        [FromQuery] DrinkFilterModel filter,
+    public async Task<ActionResult<List<DrinkModel>>> GetAll([FromQuery] DrinkFilterModel filter,
         CancellationToken cancellationToken)
     {
-        var drinks = await drinkService.GetFilteredAsync(filter, cancellationToken);
+        var drinks = await drinkService.GetAllAsync(filter, cancellationToken);
         return Ok(drinks);
     }
 
