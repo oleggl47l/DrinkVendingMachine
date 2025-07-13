@@ -14,16 +14,17 @@ public class DrinkRepository(ApplicationDbContext context) : BaseRepository<Drin
 
     public override async Task<Drink?> GetByIdAsync(int id, CancellationToken cancellationToken = default) =>
         await Context.Drinks
-            .AsNoTracking()
             .Include(d => d.Brand)
             .FirstOrDefaultAsync(d => d.Id == id, cancellationToken: cancellationToken);
 
     public async Task UpdateQuantityAsync(int id, int quantity, CancellationToken cancellationToken = default)
     {
-        var drink = new Drink { Id = id, Quantity = quantity };
-        Context.Drinks.Attach(drink);
-        Context.Entry(drink).Property(d => d.Quantity).IsModified = true;
-        await Context.SaveChangesAsync(cancellationToken);
+        var drink = await GetByIdAsync(id, cancellationToken);
+        if (drink != null)
+        {
+            drink.Quantity = quantity;
+            await UpdateAsync(drink, cancellationToken);
+        }
     }
 
     public async Task<IEnumerable<Drink>> GetByBrandAsync(int brandId, CancellationToken cancellationToken = default) =>

@@ -14,7 +14,6 @@ public class BrandRepository(ApplicationDbContext context) : BaseRepository<Bran
 
     public override async Task<Brand?> GetByIdAsync(int id, CancellationToken cancellationToken = default) =>
         await Context.Brands
-            .AsNoTracking()
             .Include(b => b.Drinks)
             .FirstOrDefaultAsync(b => b.Id == id, cancellationToken: cancellationToken);
 
