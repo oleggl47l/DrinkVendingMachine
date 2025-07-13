@@ -1,3 +1,4 @@
+using DrinkVendingMachine.Api.Handlers;
 using DrinkVendingMachine.Application.Extensions;
 using DrinkVendingMachine.Infrastructure.Extensions;
 using Serilog;
@@ -15,8 +16,10 @@ try
 
     builder.Host.UseSerilog();
     builder.Services.AddControllers();
-    builder.Services.AddEndpointsApiExplorer();
+    builder.Services.AddProblemDetails();
     builder.Services.AddSwaggerGen();
+    builder.Services.AddEndpointsApiExplorer();
+    builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 
     builder.Services.AddDatabase(configuration);
     builder.Services.AddApplicationServices();
@@ -30,6 +33,7 @@ try
     }
 
     app.UseHttpsRedirection();
+    app.UseExceptionHandler();
     app.MapControllers();
 
     Log.Information("Application started successfully");
