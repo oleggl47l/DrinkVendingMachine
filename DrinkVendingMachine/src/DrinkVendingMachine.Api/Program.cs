@@ -1,3 +1,4 @@
+using DrinkVendingMachine.Application.Extensions;
 using DrinkVendingMachine.Infrastructure.Extensions;
 using Serilog;
 
@@ -13,10 +14,12 @@ try
     var configuration = builder.Configuration;
 
     builder.Host.UseSerilog();
+    builder.Services.AddControllers();
     builder.Services.AddEndpointsApiExplorer();
     builder.Services.AddSwaggerGen();
 
     builder.Services.AddDatabase(configuration);
+    builder.Services.AddApplicationServices();
 
     var app = builder.Build();
 
@@ -27,6 +30,7 @@ try
     }
 
     app.UseHttpsRedirection();
+    app.MapControllers();
 
     Log.Information("Application started successfully");
     app.Run();
