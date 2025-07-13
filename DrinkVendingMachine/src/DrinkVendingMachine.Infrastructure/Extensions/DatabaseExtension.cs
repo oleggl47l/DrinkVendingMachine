@@ -11,7 +11,7 @@ public static class DatabaseExtension
     {
         services.AddDbContext<ApplicationDbContext>(options =>
         {
-            options.UseNpgsql((configuration.GetConnectionString("DrinkVendingMachineDb")));
+            options.UseNpgsql(configuration.GetConnectionString("DrinkVendingMachineDb"));
         });
     }
 }

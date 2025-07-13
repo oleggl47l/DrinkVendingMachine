@@ -11,11 +11,11 @@ try
 {
     var builder = WebApplication.CreateBuilder(args);
     var configuration = builder.Configuration;
-    
+
     builder.Host.UseSerilog();
     builder.Services.AddEndpointsApiExplorer();
     builder.Services.AddSwaggerGen();
-    
+
     builder.Services.AddDatabase(configuration);
 
     var app = builder.Build();
