@@ -3,7 +3,10 @@ using DrinkVendingMachine.Application.Services.Interfaces;
 using DrinkVendingMachine.Domain.Entities;
 using DrinkVendingMachine.Domain.Exceptions.Brand;
 using DrinkVendingMachine.Domain.Exceptions.Drink;
+using DrinkVendingMachine.Domain.Exceptions.Specific;
+using DrinkVendingMachine.Domain.Exceptions.Specific.Excel;
 using DrinkVendingMachine.Domain.Interfaces;
+using OfficeOpenXml;
 
 namespace DrinkVendingMachine.Application.Services;
 
@@ -103,4 +106,91 @@ public class DrinkService(IDrinkRepository drinkRepository, IBrandRepository bra
             drink.Quantity,
             drink.Brand.Name
         );
+
+    public async Task ImportFromExcelAsync(Stream fileStream, CancellationToken cancellationToken)
+    {
+        ExcelPackage.License.SetNonCommercialPersonal("<Oleg>");
+
+        using var package = new ExcelPackage(fileStream);
+
+        if (package.Workbook.Worksheets.Count == 0)
+            throw new ExcelEmptyWorksheetException();
+
+        var worksheet = package.Workbook.Worksheets[0];
+
+        var columnMap = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
+        var requiredColumns = new[] { "Name", "BrandId", "Price", "Quantity", "ImageUrl" };
+        var columnCount = worksheet.Dimension?.Columns ?? 0;
+
+        for (var col = 1; col <= columnCount; col++)
+        {
+            var headerText = worksheet.Cells[1, col].Text?.Trim();
+            if (!string.IsNullOrEmpty(headerText))
+            {
+                columnMap[headerText] = col;
+            }
+        }
+
+        var missingColumns = requiredColumns
+            .Where(col => !columnMap.ContainsKey(col))
+            .ToArray();
+
+        if (missingColumns.Length > 0)
+            throw new ExcelMissingColumnsException(missingColumns);
+
+        var duplicateColumns = columnMap
+            .GroupBy(x => x.Key, StringComparer.OrdinalIgnoreCase)
+            .Where(g => g.Count() > 1)
+            .Select(g => g.Key)
+            .ToArray();
+
+        if (duplicateColumns.Length > 0)
+            throw new ExcelDuplicateColumnsException(duplicateColumns);
+
+        var rowCount = worksheet.Dimension?.Rows ?? 1;
+        var importedDrinks = new List<Drink>();
+
+        for (var row = 2; row <= rowCount; row++)
+        {
+            try
+            {
+                var name = worksheet.Cells[row, columnMap["Name"]].Text?.Trim();
+                if (string.IsNullOrWhiteSpace(name))
+                    throw new ExcelDataValidationException("Name", row, "Value is empty");
+
+                var brandIdText = worksheet.Cells[row, columnMap["BrandId"]].Text;
+                if (!int.TryParse(brandIdText, out var brandId))
+                    throw new ExcelDataValidationException("BrandId", row, brandIdText);
+
+                var priceText = worksheet.Cells[row, columnMap["Price"]].Text;
+                if (!int.TryParse(priceText, out var price) || price <= 0)
+                    throw new ExcelDataValidationException("Price", row, priceText);
+
+                var quantityText = worksheet.Cells[row, columnMap["Quantity"]].Text;
+                if (!int.TryParse(quantityText, out var quantity) || quantity < 0)
+                    throw new ExcelDataValidationException("Quantity", row, quantityText);
+
+                var imageUrl = worksheet.Cells[row, columnMap["ImageUrl"]].Text?.Trim();
+
+                if (!await brandRepository.ExistsAsync(brandId, cancellationToken))
+                    throw new ExcelBrandNotFoundException(row, brandId);
+
+                importedDrinks.Add(new Drink
+                {
+                    Name = name,
+                    BrandId = brandId,
+                    Price = price,
+                    Quantity = quantity,
+                    ImageUrl = string.IsNullOrWhiteSpace(imageUrl) ? null : imageUrl
+                });
+            }
+            catch (KeyNotFoundException ex)
+            {
+                throw new ExcelDataValidationException("Column mapping", row, ex.Message);
+            }
+        }
+
+        foreach (var drink in importedDrinks)
+            await drinkRepository.AddAsync(drink, cancellationToken);
+    }
 }

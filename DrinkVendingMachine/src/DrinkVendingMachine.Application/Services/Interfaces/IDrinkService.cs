@@ -12,4 +12,5 @@ public interface IDrinkService
     Task AddAsync(DrinkCreateModel model, CancellationToken cancellationToken);
     Task UpdateAsync(DrinkUpdateModel model, CancellationToken cancellationToken);
     Task DeleteAsync(int id, CancellationToken cancellationToken);
+    Task ImportFromExcelAsync(Stream fileStream, CancellationToken cancellationToken);
 }

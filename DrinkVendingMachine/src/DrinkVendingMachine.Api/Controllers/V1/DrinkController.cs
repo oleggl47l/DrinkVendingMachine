@@ -60,4 +60,14 @@ public class DrinkController(IDrinkService drinkService) : ControllerBase
         await drinkService.DeleteAsync(id, cancellationToken);
         return NoContent();
     }
+
+    [HttpPost("import")]
+    [Consumes("multipart/form-data")]
+    public async Task<IActionResult> ImportFromExcel(IFormFile file, CancellationToken cancellationToken)
+    {
+        await using var stream = file.OpenReadStream();
+        await drinkService.ImportFromExcelAsync(stream, cancellationToken);
+
+        return Ok();
+    }
 }
