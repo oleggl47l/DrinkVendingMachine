@@ -1,14 +1,17 @@
 ﻿using DrinkVendingMachine.Application.DTOs.Drink;
 using DrinkVendingMachine.Application.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
+using Swashbuckle.AspNetCore.Annotations;
 
 namespace DrinkVendingMachine.Api.Controllers.V1;
 
 [ApiController]
-[Route("api/[controller]")]
+[Route("api/v1/[controller]")]
+[Produces("application/json")]
 public class DrinkController(IDrinkService drinkService) : ControllerBase
 {
     [HttpGet]
+    [SwaggerOperation(OperationId = "GetAllDrinks")]
     public async Task<ActionResult<List<DrinkModel>>> GetAll([FromQuery] DrinkFilterModel filter,
         CancellationToken cancellationToken)
     {
@@ -17,6 +20,7 @@ public class DrinkController(IDrinkService drinkService) : ControllerBase
     }
 
     [HttpGet("{id:int}")]
+    [SwaggerOperation(OperationId = "GetDrinkById")]
     public async Task<ActionResult<DrinkModel>> GetById(int id, CancellationToken cancellationToken)
     {
         var drink = await drinkService.GetByIdAsync(id, cancellationToken);
@@ -24,6 +28,7 @@ public class DrinkController(IDrinkService drinkService) : ControllerBase
     }
 
     [HttpGet("by-brand/{brandId:int}")]
+    [SwaggerOperation(OperationId = "GetDrinksByBrand")]
     public async Task<ActionResult<List<DrinkModel>>> GetByBrand(int brandId, CancellationToken cancellationToken)
     {
         var drinks = await drinkService.GetByBrandAsync(brandId, cancellationToken);
@@ -31,6 +36,7 @@ public class DrinkController(IDrinkService drinkService) : ControllerBase
     }
 
     [HttpPut("{id:int}/quantity")]
+    [SwaggerOperation(OperationId = "UpdateDrinkQuantity")]
     public async Task<IActionResult> UpdateQuantity(int id, [FromQuery] int quantity,
         CancellationToken cancellationToken)
     {
@@ -39,13 +45,15 @@ public class DrinkController(IDrinkService drinkService) : ControllerBase
     }
 
     [HttpPost]
-    public async Task<IActionResult> Add([FromBody] DrinkCreateModel model, CancellationToken cancellationToken)
+    [SwaggerOperation(OperationId = "CreateDrink")]
+    public async Task<IActionResult> Create([FromBody] DrinkCreateModel model, CancellationToken cancellationToken)
     {
         var result = await drinkService.AddAsync(model, cancellationToken);
         return CreatedAtAction(nameof(GetById), new { id = result.Id }, result);
     }
 
     [HttpPatch("{id:int}")]
+    [SwaggerOperation(OperationId = "UpdateDrink")]
     public async Task<IActionResult> Update(int id, [FromBody] DrinkUpdateModel model,
         CancellationToken cancellationToken)
     {
@@ -55,6 +63,7 @@ public class DrinkController(IDrinkService drinkService) : ControllerBase
     }
 
     [HttpDelete("{id:int}")]
+    [SwaggerOperation(OperationId = "DeleteDrink")]
     public async Task<IActionResult> Delete(int id, CancellationToken cancellationToken)
     {
         await drinkService.DeleteAsync(id, cancellationToken);
@@ -63,6 +72,7 @@ public class DrinkController(IDrinkService drinkService) : ControllerBase
 
     [HttpPost("import")]
     [Consumes("multipart/form-data")]
+    [SwaggerOperation(OperationId = "ImportDrinksFromExcel")]
     public async Task<IActionResult> ImportFromExcel(IFormFile file, CancellationToken cancellationToken)
     {
         await using var stream = file.OpenReadStream();

@@ -1,14 +1,17 @@
 ﻿using DrinkVendingMachine.Application.DTOs.Brand;
 using DrinkVendingMachine.Application.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
+using Swashbuckle.AspNetCore.Annotations;
 
 namespace DrinkVendingMachine.Api.Controllers.V1;
 
 [ApiController]
-[Route("api/[controller]")]
+[Route("api/v1/[controller]")]
+[Produces("application/json")]
 public class BrandController(IBrandService brandService) : ControllerBase
 {
     [HttpGet]
+    [SwaggerOperation(OperationId = "GetAllBrands")]
     public async Task<ActionResult<List<BrandModel>>> GetAll(CancellationToken cancellationToken)
     {
         var brands = await brandService.GetAllAsync(cancellationToken);
@@ -16,6 +19,7 @@ public class BrandController(IBrandService brandService) : ControllerBase
     }
 
     [HttpGet("{id:int}")]
+    [SwaggerOperation(OperationId = "GetBrandById")]
     public async Task<ActionResult<BrandModel>> GetById(int id, CancellationToken cancellationToken)
     {
         var brand = await brandService.GetByIdAsync(id, cancellationToken);
@@ -23,7 +27,8 @@ public class BrandController(IBrandService brandService) : ControllerBase
     }
 
     [HttpPost]
-    public async Task<ActionResult<BrandModel>> Add([FromBody] BrandCreateModel model,
+    [SwaggerOperation(OperationId = "CreateBrand")]
+    public async Task<ActionResult<BrandModel>> Create([FromBody] BrandCreateModel model,
         CancellationToken cancellationToken)
     {
         var result = await brandService.AddAsync(model, cancellationToken);
@@ -31,6 +36,7 @@ public class BrandController(IBrandService brandService) : ControllerBase
     }
 
     [HttpPut("{id:int}")]
+    [SwaggerOperation(OperationId = "UpdateBrand")]
     public async Task<ActionResult<BrandModel>> Update(int id, [FromBody] BrandUpdateModel model,
         CancellationToken cancellationToken)
     {
@@ -40,6 +46,7 @@ public class BrandController(IBrandService brandService) : ControllerBase
     }
 
     [HttpDelete("{id:int}")]
+    [SwaggerOperation(OperationId = "DeleteBrand")]
     public async Task<IActionResult> Delete(int id, CancellationToken cancellationToken)
     {
         await brandService.DeleteAsync(id, cancellationToken);
@@ -47,6 +54,7 @@ public class BrandController(IBrandService brandService) : ControllerBase
     }
 
     [HttpGet("is-name-unique")]
+    [SwaggerOperation(OperationId = "CheckBrandNameUnique")]
     public async Task<ActionResult<bool>> IsNameUnique([FromQuery] string name, CancellationToken cancellationToken)
     {
         var isUnique = await brandService.IsNameUniqueAsync(name, cancellationToken);
