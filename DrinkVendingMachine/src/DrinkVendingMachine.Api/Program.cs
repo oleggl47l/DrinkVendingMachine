@@ -1,4 +1,6 @@
+using DrinkVendingMachine.Api.Extensions;
 using DrinkVendingMachine.Api.Handlers;
+using DrinkVendingMachine.Api.Options;
 using DrinkVendingMachine.Application.Extensions;
 using DrinkVendingMachine.Infrastructure.Extensions;
 using Serilog;
@@ -13,13 +15,15 @@ try
 {
     var builder = WebApplication.CreateBuilder(args);
     var configuration = builder.Configuration;
+    var swaggerDocOptions = configuration.GetSection("SwaggerDocOptions").Get<SwaggerDocOptions>() ??
+                            throw new ArgumentNullException(nameof(SwaggerDocOptions));
 
     builder.Host.UseSerilog();
     builder.Services.AddControllers();
     builder.Services.AddProblemDetails();
-    builder.Services.AddSwaggerGen();
     builder.Services.AddEndpointsApiExplorer();
     builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
+    builder.Services.AddSwagger(swaggerDocOptions);
 
     builder.Services.AddDatabase(configuration);
     builder.Services.AddApplicationServices();
@@ -29,7 +33,11 @@ try
     if (app.Environment.IsDevelopment())
     {
         app.UseSwagger();
-        app.UseSwaggerUI();
+        app.UseSwaggerUI(options =>
+        {
+            options.SwaggerEndpoint($"/swagger/{swaggerDocOptions.Name}/swagger.json",
+                $"{swaggerDocOptions.Title} {swaggerDocOptions.Version}");
+        });
     }
 
     app.UseHttpsRedirection();
