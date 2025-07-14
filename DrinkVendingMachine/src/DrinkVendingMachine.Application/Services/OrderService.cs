@@ -135,6 +135,7 @@ public class OrderService(
             var order = new Order
             {
                 CreatedAt = DateTime.UtcNow,
+                TotalAmount = orderTotal,
                 Items = model.Items.Select(item =>
                 {
                     var drink = drinks.First(d => d.Id == item.DrinkId);
