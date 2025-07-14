@@ -27,7 +27,7 @@ public class GlobalExceptionHandler(ILogger<GlobalExceptionHandler> logger) : IE
             (typeof(InvalidDrinkPriceException), "Invalid drink price."),
             (typeof(InvalidDrinkQuantityException), "Invalid drink quantity."),
             (typeof(NotEnoughDrinkStockException), "Not enough drink stock."),
-            (typeof(NotEnoughCoinStockException), "Not enough coins of that type."),
+            (typeof(UnableToGiveChangeException), "Unable to give change."),
             (typeof(NotEnoughMoneyInsertedException), "Not enough money inserted.")
         ],
         [StatusCodes.Status404NotFound] =
