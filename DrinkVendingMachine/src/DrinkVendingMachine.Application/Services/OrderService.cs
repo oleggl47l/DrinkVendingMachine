@@ -1,9 +1,11 @@
 ﻿using DrinkVendingMachine.Application.DTOs.Order;
+using DrinkVendingMachine.Application.DTOs.OrderItem;
 using DrinkVendingMachine.Application.Services.Interfaces;
 using DrinkVendingMachine.Domain.Entities;
 using DrinkVendingMachine.Domain.Exceptions.Brand;
 using DrinkVendingMachine.Domain.Exceptions.Coin;
 using DrinkVendingMachine.Domain.Exceptions.Drink;
+using DrinkVendingMachine.Domain.Exceptions.Order;
 using DrinkVendingMachine.Domain.Exceptions.Specific;
 using DrinkVendingMachine.Domain.Interfaces;
 using Microsoft.EntityFrameworkCore;
@@ -16,6 +18,45 @@ public class OrderService(
     IOrderRepository orderRepository,
     IUnitOfWork unitOfWork) : IOrderService
 {
+    public async Task<List<OrderModel>> GetAllOrdersAsync(CancellationToken cancellationToken)
+    {
+        var orders = await orderRepository.GetAllWithItemsAsync(cancellationToken);
+        return orders.Select(MapToModel).ToList();
+    }
+
+    public async Task<OrderModel> GetOrderByIdAsync(int orderId, CancellationToken cancellationToken)
+    {
+        var order = await orderRepository.GetWithItemsAsync(orderId, cancellationToken)
+                    ?? throw new OrderNotFoundException(orderId);
+
+        return MapToModel(order);
+    }
+
+
+    public async Task DeleteOrderAsync(int orderId, CancellationToken cancellationToken)
+    {
+        var order = await orderRepository.GetWithItemsAsync(orderId, cancellationToken)
+                    ?? throw new OrderNotFoundException(orderId);
+
+        await orderRepository.DeleteAsync(order, cancellationToken);
+    }
+
+    private static OrderModel MapToModel(Order order)
+    {
+        return new OrderModel
+        (
+            order.Id,
+            order.CreatedAt,
+            order.TotalAmount,
+            order.Items.Select(item => new OrderItemModel
+            (
+                item.DrinkName,
+                item.BrandName,
+                item.PriceAtPurchase,
+                item.Quantity
+            )).ToList());
+    }
+
     public async Task<OrderResultDto> CreateOrderAsync(OrderCreateModel model, CancellationToken cancellationToken)
     {
         return await unitOfWork.ExecuteInTransactionAsync(async () =>
