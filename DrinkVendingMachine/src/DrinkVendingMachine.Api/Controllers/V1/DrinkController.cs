@@ -41,8 +41,8 @@ public class DrinkController(IDrinkService drinkService) : ControllerBase
     [HttpPost]
     public async Task<IActionResult> Add([FromBody] DrinkCreateModel model, CancellationToken cancellationToken)
     {
-        await drinkService.AddAsync(model, cancellationToken);
-        return NoContent();
+        var result = await drinkService.AddAsync(model, cancellationToken);
+        return CreatedAtAction(nameof(GetById), new { id = result.Id }, result);
     }
 
     [HttpPatch("{id:int}")]
@@ -50,8 +50,8 @@ public class DrinkController(IDrinkService drinkService) : ControllerBase
         CancellationToken cancellationToken)
     {
         model = model with { Id = id };
-        await drinkService.UpdateAsync(model, cancellationToken);
-        return NoContent();
+        var result = await drinkService.UpdateAsync(model, cancellationToken);
+        return Ok(result);
     }
 
     [HttpDelete("{id:int}")]

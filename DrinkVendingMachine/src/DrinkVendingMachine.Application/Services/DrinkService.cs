@@ -3,7 +3,6 @@ using DrinkVendingMachine.Application.Services.Interfaces;
 using DrinkVendingMachine.Domain.Entities;
 using DrinkVendingMachine.Domain.Exceptions.Brand;
 using DrinkVendingMachine.Domain.Exceptions.Drink;
-using DrinkVendingMachine.Domain.Exceptions.Specific;
 using DrinkVendingMachine.Domain.Exceptions.Specific.Excel;
 using DrinkVendingMachine.Domain.Interfaces;
 using OfficeOpenXml;
@@ -45,7 +44,7 @@ public class DrinkService(IDrinkRepository drinkRepository, IBrandRepository bra
         await drinkRepository.UpdateAsync(drink, cancellationToken);
     }
 
-    public async Task AddAsync(DrinkCreateModel model, CancellationToken cancellationToken)
+    public async Task<DrinkModel> AddAsync(DrinkCreateModel model, CancellationToken cancellationToken)
     {
         if (model.Price <= 0)
             throw new InvalidDrinkPriceException(model.Price);
@@ -63,9 +62,10 @@ public class DrinkService(IDrinkRepository drinkRepository, IBrandRepository bra
         };
 
         await drinkRepository.AddAsync(drink, cancellationToken);
+        return (await GetByIdAsync(drink.Id, cancellationToken))!;
     }
 
-    public async Task UpdateAsync(DrinkUpdateModel model, CancellationToken cancellationToken)
+    public async Task<DrinkModel> UpdateAsync(DrinkUpdateModel model, CancellationToken cancellationToken)
     {
         var existing = await drinkRepository.GetByIdAsync(model.Id, cancellationToken)
                        ?? throw new DrinkNotFoundException(model.Id);
@@ -87,6 +87,7 @@ public class DrinkService(IDrinkRepository drinkRepository, IBrandRepository bra
         if (model.BrandId.HasValue) existing.BrandId = model.BrandId.Value;
 
         await drinkRepository.UpdateAsync(existing, cancellationToken);
+        return (await GetByIdAsync(model.Id, cancellationToken))!;
     }
 
     public async Task DeleteAsync(int id, CancellationToken cancellationToken)
