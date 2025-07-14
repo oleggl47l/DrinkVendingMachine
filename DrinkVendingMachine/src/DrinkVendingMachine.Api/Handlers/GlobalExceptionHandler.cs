@@ -3,6 +3,7 @@ using DrinkVendingMachine.Domain.Exceptions.Brand;
 using DrinkVendingMachine.Domain.Exceptions.Coin;
 using DrinkVendingMachine.Domain.Exceptions.Drink;
 using DrinkVendingMachine.Domain.Exceptions.Specific;
+using DrinkVendingMachine.Domain.Exceptions.Specific.Excel;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 
@@ -28,7 +29,11 @@ public class GlobalExceptionHandler(ILogger<GlobalExceptionHandler> logger) : IE
             (typeof(InvalidDrinkQuantityException), "Invalid drink quantity."),
             (typeof(NotEnoughDrinkStockException), "Not enough drink stock."),
             (typeof(UnableToGiveChangeException), "Unable to give change."),
-            (typeof(NotEnoughMoneyInsertedException), "Not enough money inserted.")
+            (typeof(NotEnoughMoneyInsertedException), "Not enough money inserted."),
+            (typeof(ExcelMissingColumnsException), "Missing required columns in Excel file."),
+            (typeof(ExcelDuplicateColumnsException), "Duplicate columns in Excel file."),
+            (typeof(ExcelDataValidationException), "Invalid data in Excel file."),
+            (typeof(ExcelBrandNotFoundException), "Brand not found from Excel data.")
         ],
         [StatusCodes.Status404NotFound] =
         [
@@ -44,7 +49,8 @@ public class GlobalExceptionHandler(ILogger<GlobalExceptionHandler> logger) : IE
         ],
         [StatusCodes.Status500InternalServerError] =
         [
-            (typeof(Microsoft.EntityFrameworkCore.DbUpdateException), "A database error occurred.")
+            (typeof(Microsoft.EntityFrameworkCore.DbUpdateException), "A database error occurred."),
+            (typeof(ExcelEmptyWorksheetException), "Empty worksheet in Excel file.")
         ]
     };
 
