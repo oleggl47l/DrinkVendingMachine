@@ -23,19 +23,20 @@ public class BrandController(IBrandService brandService) : ControllerBase
     }
 
     [HttpPost]
-    public async Task<IActionResult> Add([FromBody] BrandCreateModel model, CancellationToken cancellationToken)
+    public async Task<ActionResult<BrandModel>> Add([FromBody] BrandCreateModel model,
+        CancellationToken cancellationToken)
     {
-        await brandService.AddAsync(model, cancellationToken);
-        return NoContent();
+        var result = await brandService.AddAsync(model, cancellationToken);
+        return CreatedAtAction(nameof(GetById), new { id = result.Id }, result);
     }
 
     [HttpPut("{id:int}")]
-    public async Task<IActionResult> Update(int id, [FromBody] BrandUpdateModel model,
+    public async Task<ActionResult<BrandModel>> Update(int id, [FromBody] BrandUpdateModel model,
         CancellationToken cancellationToken)
     {
         model = model with { Id = id };
-        await brandService.UpdateAsync(model, cancellationToken);
-        return NoContent();
+        var result = await brandService.UpdateAsync(model, cancellationToken);
+        return Ok(result);
     }
 
     [HttpDelete("{id:int}")]

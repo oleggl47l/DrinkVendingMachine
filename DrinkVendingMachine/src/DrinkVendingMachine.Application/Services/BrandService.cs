@@ -16,27 +16,25 @@ public class BrandService(IBrandRepository brandRepository) : IBrandService
 
     public async Task<BrandModel?> GetByIdAsync(int id, CancellationToken cancellationToken)
     {
-        var brand = await brandRepository.GetByIdAsync(id, cancellationToken) 
+        var brand = await brandRepository.GetByIdAsync(id, cancellationToken)
                     ?? throw new BrandNotFoundException(id);
-    
+
         return MapToModel(brand);
     }
 
-    public async Task AddAsync(BrandCreateModel model, CancellationToken cancellationToken)
+    public async Task<BrandModel> AddAsync(BrandCreateModel model, CancellationToken cancellationToken)
     {
         var isUnique = await brandRepository.IsNameUniqueAsync(model.Name, cancellationToken);
         if (!isUnique)
             throw new BrandNameNotUniqueException(model.Name);
 
-        var brand = new Brand
-        {
-            Name = model.Name
-        };
-
+        var brand = new Brand { Name = model.Name };
         await brandRepository.AddAsync(brand, cancellationToken);
+
+        return MapToModel(brand);
     }
 
-    public async Task UpdateAsync(BrandUpdateModel model, CancellationToken cancellationToken)
+    public async Task<BrandModel> UpdateAsync(BrandUpdateModel model, CancellationToken cancellationToken)
     {
         var brand = await brandRepository.GetByIdAsync(model.Id, cancellationToken)
                     ?? throw new BrandNotFoundException(model.Id);
@@ -47,6 +45,8 @@ public class BrandService(IBrandRepository brandRepository) : IBrandService
 
         brand.Name = model.Name;
         await brandRepository.UpdateAsync(brand, cancellationToken);
+
+        return MapToModel(brand);
     }
 
     public async Task DeleteAsync(int id, CancellationToken cancellationToken)
