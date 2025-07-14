@@ -111,7 +111,8 @@ public class OrderService(
 
             return new OrderResultDto(
                 "Спасибо за вашу покупку, пожалуйста, возьмите вашу сдачу.",
-                changeToGive
+                changeToGive,
+                changeAmount
             );
         }, cancellationToken);
     }
