@@ -10,5 +10,14 @@ public static class ApiServiceCollectionExtensions
         services.AddProblemDetails();
         services.AddEndpointsApiExplorer();
         services.AddExceptionHandler<GlobalExceptionHandler>();
+
+        services.AddCors(options =>
+        {
+            options.AddPolicy("AllowFrontend",
+                builder => builder
+                    .WithOrigins("http://localhost:3000")
+                    .AllowAnyMethod()
+                    .AllowAnyHeader());
+        });
     }
 }

@@ -19,5 +19,6 @@ public static class ApplicationBuilderExtensions
 
         app.UseHttpsRedirection();
         app.UseExceptionHandler();
+        app.UseCors("AllowFrontend");
     }
 }
