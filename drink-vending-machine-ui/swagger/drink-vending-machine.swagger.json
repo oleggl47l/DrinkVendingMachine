@@ -409,6 +409,36 @@
         }
       }
     },
+    "/api/v1/Drink/price-range": {
+      "get": {
+        "tags": [
+          "Drink"
+        ],
+        "operationId": "GetDrinksPriceRange",
+        "parameters": [
+          {
+            "name": "brandId",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PriceRangeModel"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/Drink/{id}/quantity": {
       "put": {
         "tags": [
@@ -830,6 +860,20 @@
             "nullable": true
           },
           "changeAmount": {
+            "type": "integer",
+            "format": "int32"
+          }
+        },
+        "additionalProperties": false
+      },
+      "PriceRangeModel": {
+        "type": "object",
+        "properties": {
+          "minPrice": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "maxPrice": {
             "type": "integer",
             "format": "int32"
           }
