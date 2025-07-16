@@ -35,6 +35,12 @@ public class DrinkController(IDrinkService drinkService) : ControllerBase
         return Ok(drinks);
     }
 
+    [HttpGet("price-range")]
+    [SwaggerOperation(OperationId = "GetDrinksPriceRange")]
+    public async Task<ActionResult<PriceRangeModel>> GetPriceRange([FromQuery] int? brandId,
+        CancellationToken cancellationToken) =>
+        Ok(await drinkService.GetPriceRangeAsync(brandId, cancellationToken));
+
     [HttpPut("{id:int}/quantity")]
     [SwaggerOperation(OperationId = "UpdateDrinkQuantity")]
     public async Task<IActionResult> UpdateQuantity(int id, [FromQuery] int quantity,

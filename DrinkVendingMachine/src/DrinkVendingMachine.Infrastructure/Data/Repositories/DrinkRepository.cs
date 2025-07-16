@@ -43,4 +43,20 @@ public class DrinkRepository(ApplicationDbContext context) : BaseRepository<Drin
 
         return await query.ToListAsync(cancellationToken);
     }
+    
+    public async Task<(int MinPrice, int MaxPrice)> GetPriceRangeAsync(int? brandId, CancellationToken cancellationToken)
+    {
+        var query = Context.Drinks.AsQueryable();
+    
+        if (brandId.HasValue)
+            query = query.Where(d => d.BrandId == brandId.Value);
+
+        if (!await query.AnyAsync(cancellationToken))
+            return (0, 0);
+
+        var minPrice = await query.MinAsync(d => d.Price, cancellationToken);
+        var maxPrice = await query.MaxAsync(d => d.Price, cancellationToken);
+    
+        return (minPrice, maxPrice);
+    }
 }

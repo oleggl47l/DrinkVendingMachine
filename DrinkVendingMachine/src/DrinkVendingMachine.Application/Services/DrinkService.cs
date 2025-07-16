@@ -97,6 +97,12 @@ public class DrinkService(IDrinkRepository drinkRepository, IBrandRepository bra
 
         await drinkRepository.DeleteAsync(drink, cancellationToken);
     }
+    
+    public async Task<PriceRangeModel> GetPriceRangeAsync(int? brandId, CancellationToken cancellationToken)
+    {
+        var (minPrice, maxPrice) = await drinkRepository.GetPriceRangeAsync(brandId, cancellationToken);
+        return new PriceRangeModel(minPrice, maxPrice);
+    }
 
     private static DrinkModel MapToModel(Drink drink) =>
         new(
