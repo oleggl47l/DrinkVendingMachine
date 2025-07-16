@@ -15,6 +15,9 @@ public static class SwaggerExtension
                 Title = options.Title,
                 Description = options.Description
             });
+            foreach (var server in options.Servers)
+                o.AddServer(server);
+
             o.EnableAnnotations();
         });
     }

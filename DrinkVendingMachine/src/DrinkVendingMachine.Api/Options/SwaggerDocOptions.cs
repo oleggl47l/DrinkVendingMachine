@@ -1,3 +1,5 @@
-﻿namespace DrinkVendingMachine.Api.Options;
+﻿using Microsoft.OpenApi.Models;
 
-public record SwaggerDocOptions(string Name, string Version, string Title, string Description);
+namespace DrinkVendingMachine.Api.Options;
+
+public record SwaggerDocOptions(string Name, string Version, string Title, string Description, OpenApiServer[] Servers);
