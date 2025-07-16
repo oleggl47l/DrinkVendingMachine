@@ -9,6 +9,7 @@ export const useDrinks = () => {
     const [priceBounds, setPriceBounds] = useState<[number, number]>([0, 1000]);
     const [selectedRange, setSelectedRange] = useState<[number, number]>([0, 1000]);
     const [loading, setLoading] = useState(true);
+    const [selectedDrinkIds, setSelectedDrinkIds] = useState<Set<number>>(new Set());
 
     const loadInitialData = async () => {
         try {
@@ -35,20 +36,40 @@ export const useDrinks = () => {
         setLoading(true);
 
         try {
-            const newPriceRange = await DrinkService.getDrinksPriceRange({ brandId: brandId || undefined });
+            const newPriceRange = await DrinkService.getDrinksPriceRange({brandId: brandId || undefined});
 
             const bounds: [number, number] = [
                 newPriceRange.minPrice || 0,
-                newPriceRange.maxPrice || (newPriceRange.minPrice || 0) + 100
+                newPriceRange.maxPrice || (newPriceRange.minPrice || 0) + 1000
             ];
 
             setPriceBounds(bounds);
             setSelectedRange(bounds);
+
+            const filteredDrinks = await DrinkService.getAllDrinks({
+                brandId: brandId || undefined,
+                minPrice: bounds[0],
+                maxPrice: bounds[1]
+            });
+
+            setDrinks(filteredDrinks);
         } catch (error) {
             console.error('Error filtering drinks:', error);
         } finally {
             setLoading(false);
         }
+    };
+
+    const toggleSelectDrink = (id: number) => {
+        setSelectedDrinkIds((prev) => {
+            const newSet = new Set(prev);
+            if (newSet.has(id)) {
+                newSet.delete(id);
+            } else {
+                newSet.add(id);
+            }
+            return newSet;
+        });
     };
 
     const handlePriceChange = debounce(async (newRange: [number, number]) => {
@@ -90,6 +111,8 @@ export const useDrinks = () => {
         selectedRange,
         loading,
         handleBrandChange,
-        handlePriceChange
+        handlePriceChange,
+        selectedDrinkIds,
+        toggleSelectDrink
     };
 };
