@@ -20,7 +20,7 @@ try
 
     builder.Host.UseSerilog();
     builder.Services.AddSwagger(swaggerDocOptions);
-    builder.Services.AddApiServices();
+    builder.Services.AddApiServices(configuration);
     builder.Services.AddDatabase(configuration);
     builder.Services.AddApplicationServices();
 

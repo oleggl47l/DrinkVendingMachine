@@ -4,7 +4,7 @@ namespace DrinkVendingMachine.Api.Extensions;
 
 public static class ApiServiceCollectionExtensions
 {
-    public static void AddApiServices(this IServiceCollection services)
+    public static void AddApiServices(this IServiceCollection services, IConfiguration configuration)
     {
         services.AddControllers();
         services.AddProblemDetails();
@@ -18,6 +18,11 @@ public static class ApiServiceCollectionExtensions
                     .WithOrigins("http://localhost:3000")
                     .AllowAnyMethod()
                     .AllowAnyHeader());
+        });
+        
+        services.AddStackExchangeRedisCache(options =>
+        {
+            options.Configuration = configuration.GetConnectionString("Redis");
         });
     }
 }
