@@ -4,6 +4,7 @@ import {useDrinks} from "@/hooks/use-drinks";
 import {DrinkFilters} from "@/components/drinks/drink-filter";
 import {DrinkList} from "@/components/drinks/drink-list";
 import {useRouter} from "next/navigation";
+import {DrinkImport} from "@/components/drinks/drink-import";
 
 export default function CatalogPage() {
     const router = useRouter();
@@ -18,7 +19,8 @@ export default function CatalogPage() {
         handleBrandChange,
         handlePriceChange,
         selectedDrinkIds,
-        toggleSelectDrink
+        toggleSelectDrink,
+        refreshDrinks
     } = useDrinks();
 
     const goToOrderPage = () => {
@@ -41,9 +43,7 @@ export default function CatalogPage() {
                     />
                 </div>
                 <div className="flex flex-col space-y-7">
-                    <button className="bg-gray-200 text-gray-800 px-4 py-3 rounded">
-                        Импорт
-                    </button>
+                    <DrinkImport onImportSuccess={() => refreshDrinks()}/>
                     <button className="bg-green-600 text-white px-4 py-3 rounded hover:bg-green-700"
                             onClick={goToOrderPage}
                     >

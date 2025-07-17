@@ -31,6 +31,30 @@ export const useDrinks = () => {
         }
     };
 
+    const fetchDrinks = async ({
+                                   brandId = selectedBrand,
+                                   minPrice = selectedRange[0],
+                                   maxPrice = selectedRange[1],
+                               }: {
+        brandId?: number | null;
+        minPrice?: number;
+        maxPrice?: number;
+    } = {}) => {
+        setLoading(true);
+        try {
+            const filteredDrinks = await DrinkService.getAllDrinks({
+                brandId: brandId || undefined,
+                minPrice,
+                maxPrice,
+            });
+            setDrinks(filteredDrinks);
+        } catch (error) {
+            console.error('Error fetching drinks:', error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
     const handleBrandChange = async (brandId: number | null) => {
         setSelectedBrand(brandId);
         setLoading(true);
@@ -113,6 +137,7 @@ export const useDrinks = () => {
         handleBrandChange,
         handlePriceChange,
         selectedDrinkIds,
-        toggleSelectDrink
+        toggleSelectDrink,
+        refreshDrinks: fetchDrinks,
     };
 };
