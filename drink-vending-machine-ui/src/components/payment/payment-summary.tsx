@@ -8,7 +8,7 @@ interface Props {
 
 export const PaymentSummary = ({orderTotal, totalInserted, isEnough}: Props) => {
     return (
-        <div className="border-t border-gray-300 mt-8 pt-4 flex justify-end gap-4 items-center">
+        <div className="border-gray-300 flex justify-end gap-4 items-center">
             <div className="flex justify-end mr-12">
                 <p>Итоговая сумма</p>
                 <p className="ml-6 text-xl font-semibold">{orderTotal} руб.</p>

@@ -62,16 +62,22 @@ export default function PaymentPage() {
     };
 
     return (
-        <div className="container mx-auto px-4 py-8">
-            <h1 className="text-3xl font-bold mb-6">Оплата</h1>
+        <div className="container mx-auto px-4 py-8 flex flex-col h-[100vh] max-h-[100vh]">
+            <h1 className="text-3xl font-bold mb-6 flex-shrink-0">Оплата</h1>
 
-            <section className="grid grid-cols-[1fr_304px_100px] gap-4 font-semibold mb-4">
-                <div>Номинал</div>
-                <div>Количество</div>
-                <div>Сумма</div>
-            </section>
+            <div className="flex-shrink-0 border-b border-gray-300 pb-4 mb-4 pr-8">
+                <section className="grid grid-cols-[1fr_2fr_1fr] gap-4 font-semibold text-gray-700">
+                    <div>Номинал</div>
+                    <div className="flex justify-center">Количество</div>
+                    <div className="flex justify-center">Сумма</div>
+                </section>
+            </div>
 
-            <section className="border-t border-gray-300 pt-4">
+            <section
+                className="flex-grow overflow-y-auto space-y-4 pr-4 min-h-[100px]"
+                style={{ scrollbarGutter: 'stable' }}
+                aria-label="Монеты для оплаты"
+            >
                 {!isLoaded ? (
                     <p>Загрузка...</p>
                 ) : (
@@ -81,26 +87,30 @@ export default function PaymentPage() {
                 )}
             </section>
 
-            <PaymentSummary
-                orderTotal={orderTotal}
-                totalInserted={totalInserted}
-                isEnough={isEnough}
-            />
+            <div className="mt-auto border-t border-gray-300 pt-6">
+                <div className="flex justify-end mb-8">
+                    <PaymentSummary
+                        orderTotal={orderTotal}
+                        totalInserted={totalInserted}
+                        isEnough={isEnough}
+                    />
+                </div>
 
-            <div className="flex justify-between mt-8">
-                <button
-                    onClick={() => window.history.back()}
-                    className="bg-yellow-400 text-black hover:bg-yellow-500 px-20 py-3 rounded"
-                >
-                    Вернуться
-                </button>
-                <button
-                    onClick={handlePayment}
-                    disabled={!isEnough || loading}
-                    className="bg-green-600 text-white hover:bg-green-700 px-20 py-3 rounded disabled:opacity-50"
-                >
-                    {loading ? 'Оплата...' : 'Оплатить'}
-                </button>
+                <div className="flex justify-between">
+                    <button
+                        onClick={() => window.history.back()}
+                        className="bg-yellow-400 text-black hover:bg-yellow-500 px-20 py-3 rounded"
+                    >
+                        Вернуться
+                    </button>
+                    <button
+                        onClick={handlePayment}
+                        disabled={!isEnough || loading}
+                        className="bg-green-600 text-white hover:bg-green-700 px-20 py-3 rounded disabled:opacity-50"
+                    >
+                        {loading ? 'Оплата...' : 'Оплатить'}
+                    </button>
+                </div>
             </div>
         </div>
     );

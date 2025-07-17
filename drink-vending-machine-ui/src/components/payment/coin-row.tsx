@@ -10,7 +10,7 @@ interface CoinRowProps {
 
 export const CoinRow = ({coin, onChange}: CoinRowProps) => {
     return (
-        <div className="grid grid-cols-[1fr_328px_100px] gap-4 items-center mb-12">
+        <div className="grid grid-cols-[1fr_2fr_1fr] gap-4 items-center mb-8">
             <div className="flex items-center gap-4">
                 <div
                     className="w-12 h-12 rounded-full border-2 border-gray-600 bg-gray-300 text-gray-800 flex items-center justify-center font-semibold text-lg"
@@ -20,11 +20,12 @@ export const CoinRow = ({coin, onChange}: CoinRowProps) => {
                 <span>{coin.nominal} {getRubleWord(coin.nominal)}</span>
             </div>
 
-            <div className="flex items-center gap-2">
+            <div className="flex justify-center items-center gap-2">
                 <button
                     onClick={() => onChange(coin.id, -1)}
-                    className="bg-black text-white w-8 h-8 flex items-center justify-center rounded"
+                    className="bg-black text-white w-8 h-8 flex items-center justify-center rounded hover:bg-gray-700"
                     disabled={coin.countSelected <= 0}
+                    aria-label={`Уменьшить количество монет номиналом ${coin.nominal}`}
                 >
                     <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
                          stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
@@ -37,7 +38,8 @@ export const CoinRow = ({coin, onChange}: CoinRowProps) => {
                 </div>
                 <button
                     onClick={() => onChange(coin.id, 1)}
-                    className="bg-black text-white w-8 h-8 flex items-center justify-center rounded"
+                    className="bg-black text-white w-8 h-8 flex items-center justify-center rounded hover:bg-gray-700"
+                    aria-label={`Увеличить количество монет номиналом ${coin.nominal}`}
                 >
                     <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
                          stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
@@ -48,7 +50,9 @@ export const CoinRow = ({coin, onChange}: CoinRowProps) => {
                 </button>
             </div>
 
-            <div>{(coin.nominal || 0) * coin.countSelected} руб.</div>
+            <div className="flex justify-center font-semibold">
+                {(coin.nominal || 0) * coin.countSelected} руб.
+            </div>
         </div>
     );
 };
