@@ -16,6 +16,7 @@ interface OrderContextType {
     setItemsFromStorage: () => void;
     addItem: (item: OrderItem[]) => void;
     syncWithSelectedIds: (ids: Set<number>) => void;
+    isHydrated: boolean;
 }
 
 const OrderContext = createContext<OrderContextType | undefined>(undefined);
@@ -34,6 +35,7 @@ export const OrderProvider = ({children}: { children: React.ReactNode }) => {
     });
 
     const [total, setTotal] = useState(0);
+    const [isHydrated, setIsHydrated] = useState(false);
 
     const setItemsFromStorage = async () => {
         const storedItems = localStorage.getItem('selectedOrderItems');
@@ -63,26 +65,50 @@ export const OrderProvider = ({children}: { children: React.ReactNode }) => {
     };
 
     useEffect(() => {
+        const loadFromStorage = async () => {
+            try {
+                const stored = localStorage.getItem('selectedOrderItems');
+                if (!stored) return;
+
+                const parsed: { id: number; quantitySelected: number }[] = JSON.parse(stored);
+                const allDrinks = await DrinkService.getAllDrinks({});
+                const selected = allDrinks.filter(d => parsed.some(p => p.id === d.id));
+
+                const mapped = selected.map(d => {
+                    const match = parsed.find(p => p.id === d.id)!;
+                    return {
+                        ...d,
+                        quantitySelected: match.quantitySelected,
+                    };
+                });
+
+                setOrderItems(mapped);
+            } catch (e) {
+                console.error('Error loading order items:', e);
+            } finally {
+                setIsHydrated(true);
+            }
+        };
+
+        loadFromStorage();
+    }, []);
+
+    // Расчет общей суммы
+    useEffect(() => {
         const sum = orderItems.reduce((acc, item) => acc + (item.price || 0) * item.quantitySelected, 0);
         setTotal(sum);
     }, [orderItems]);
 
+    // Сохранение в localStorage
     useEffect(() => {
+        if (!isHydrated) return;
+
         const plain = orderItems.map(item => ({
             id: item.id!,
             quantitySelected: item.quantitySelected,
         }));
         localStorage.setItem('selectedOrderItems', JSON.stringify(plain));
-    }, [orderItems]);
-
-
-    useEffect(() => {
-        const loadFromStorage = async () => {
-            await setItemsFromStorage();
-        };
-
-        void loadFromStorage();
-    }, []);
+    }, [orderItems, isHydrated]);
 
     const changeQuantity = (id: number, delta: number) => {
         setOrderItems((prev) =>
@@ -132,8 +158,13 @@ export const OrderProvider = ({children}: { children: React.ReactNode }) => {
             addItem,
             syncWithSelectedIds,
             selectedDrinkIds,
+            isHydrated,
         };
-    }, [orderItems, total]);
+    }, [isHydrated, orderItems, total]);
+
+    if (!isHydrated) {
+        return 'Загрузка';
+    }
 
     return <OrderContext.Provider value={value}>{children}</OrderContext.Provider>;
 };

@@ -2,9 +2,19 @@
 
 import {OrderItemRow} from '@/components/order/order-item-row';
 import {useOrderContext} from "@/context/order-context";
+import {useRouter} from "next/navigation";
 
 export default function OrderPage() {
+    const router = useRouter();
     const {orderItems, total, changeQuantity, removeItem} = useOrderContext();
+
+    const handleGoToPayment = () => {
+        if (orderItems.length === 0) {
+            alert('Корзина пуста. Добавьте товары, чтобы перейти к оплате.');
+            return;
+        }
+        router.push('/payment');
+    };
 
     return (
         <div className="container mx-auto px-4 py-8">
@@ -48,7 +58,7 @@ export default function OrderPage() {
                         Вернуться
                     </button>
                     <button
-                        onClick={() => alert('Оплата не реализована')}
+                        onClick={handleGoToPayment}
                         disabled={orderItems.length === 0}
                         className={`px-20 py-3 rounded
                             ${orderItems.length === 0
@@ -58,7 +68,6 @@ export default function OrderPage() {
                     >
                         Оплата
                     </button>
-
                 </div>
             </div>
 
