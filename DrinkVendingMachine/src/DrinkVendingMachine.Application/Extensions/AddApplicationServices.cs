@@ -19,8 +19,8 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IDrinkService, DrinkService>();
         services.AddScoped<IBrandService, BrandService>();
         services.AddScoped<IOrderService, OrderService>();
+        services.AddScoped<ICoinService, CoinService>();
         services.AddScoped<IUnitOfWork, UnitOfWork>();
         services.AddSingleton<IVendingMachineLockService, RedisVendingMachineLockService>();
-
     }
 }

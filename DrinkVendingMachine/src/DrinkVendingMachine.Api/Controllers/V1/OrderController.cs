@@ -8,7 +8,7 @@ namespace DrinkVendingMachine.Api.Controllers.V1;
 [ApiController]
 [Route("api/v1/[controller]")]
 [Produces("application/json")]
-public class OrderController(IOrderService orderService) : Controller
+public class OrderController(IOrderService orderService) : ControllerBase
 {
     [HttpGet]
     [SwaggerOperation(OperationId = "GetAllOrders")]
