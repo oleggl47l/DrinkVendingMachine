@@ -1,5 +1,5 @@
 import {DrinkModel} from "@/app/api/drink-vending-machine";
-import Image from 'next/image'
+import {ImageWithFallback} from "@/components/ui/image-with-fallback";
 
 export const DrinkCard = ({
                               drink,
@@ -27,8 +27,8 @@ export const DrinkCard = ({
     return (
         <div className="flex flex-col justify-between h-full bg-white rounded shadow p-4">
             <div>
-                <Image
-                    src={drink.imageUrl || ""}
+                <ImageWithFallback
+                    src={drink.imageUrl}
                     alt={drink.name || "Напиток"}
                     width={200}
                     height={200}

@@ -1,7 +1,7 @@
 'use client';
 
-import Image from 'next/image';
 import {OrderItem} from "@/context/order-context";
+import {ImageWithFallback} from "@/components/ui/image-with-fallback";
 
 interface Props {
     item?: OrderItem;
@@ -37,8 +37,8 @@ export const OrderItemRow = ({item, onChangeQuantity, onRemove, isHeader}: Props
             aria-label={`Товар ${item.name}`}
         >
             <div className="flex items-center gap-4">
-                <Image
-                    src={item.imageUrl || ''}
+                <ImageWithFallback
+                    src={item.imageUrl}
                     alt={item.name || 'Drink'}
                     width={60}
                     height={60}
