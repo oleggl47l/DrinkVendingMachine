@@ -1142,10 +1142,6 @@
       "OrderResultDto": {
         "type": "object",
         "properties": {
-          "message": {
-            "type": "string",
-            "nullable": true
-          },
           "change": {
             "type": "object",
             "additionalProperties": {
