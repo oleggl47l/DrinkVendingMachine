@@ -64,6 +64,34 @@
 
 ---
 
+# 🛠️ Использованные технологии
+
+## Backend (ASP.NET Core)
+- **Основные фреймворки**:
+  - `Microsoft.AspNetCore.OpenApi 8.0.2` - документация API
+  - `Microsoft.EntityFrameworkCore 9.0.7` - ORM
+  - `Npgsql.EntityFrameworkCore.PostgreSQL 9.0.4` - PostgreSQL провайдер
+
+- **Дополнительные пакеты**:
+  - `Microsoft.Extensions.Caching.StackExchangeRedis 9.0.7` - Redis интеграция
+  - `EPPlus 8.0.7` - работа с Excel
+  - `Serilog.AspNetCore 9.0.0` - логирование
+  - `Swashbuckle.AspNetCore 6.4.0` - Swagger UI
+
+## Frontend (Next.js)
+- **Основные зависимости**:
+  - `Next.js 15.4.1` - React фреймворк
+  - `React 19.1.0` - UI библиотека
+  - `Tailwind CSS` - стилизация
+  - `openapi-typescript-codegen` - генерация API клиента
+
+- **Инструменты разработки**:
+  - `TypeScript 5` - типизация
+  - `ESLint` - линтинг кода
+  - `UUID` - генерация уникальных ID
+
+---
+
 Диаграммы
 
 ## Sequence
