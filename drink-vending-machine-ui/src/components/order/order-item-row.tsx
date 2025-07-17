@@ -4,20 +4,38 @@ import Image from 'next/image';
 import {OrderItem} from "@/context/order-context";
 
 interface Props {
-    item: OrderItem;
-    onChangeQuantity: (id: number, delta: number) => void;
-    onRemove: (id: number) => void;
+    item?: OrderItem;
+    onChangeQuantity?: (id: number, delta: number) => void;
+    onRemove?: (id: number) => void;
+    isHeader?: boolean;
 }
 
-export const OrderItemRow = ({item, onChangeQuantity, onRemove}: Props) => {
-    const {id, price} = item;
+export const OrderItemRow = ({item, onChangeQuantity, onRemove, isHeader}: Props) => {
+    if (isHeader) {
+        return (
+            <div
+                className="grid grid-cols-[2fr_2fr_1fr_1fr] gap-4 items-center font-semibold text-gray-700"
+                aria-label="Заголовок корзины с товарами"
+            >
+                <div>Товар</div>
+                <div className="flex justify-center">Количество</div>
+                <div className="flex justify-center">Цена</div>
+                <div aria-hidden="true"></div>
+            </div>
+        );
+    }
 
-    if (id == null || price == null) {
+    if (!item || item.id == null || item.price == null) {
         return null;
     }
 
+    const {id, price} = item;
+
     return (
-        <div className="grid grid-cols-[1fr_328px_150px_40px] gap-4 items-center mb-4 h-24">
+        <div
+            className="grid grid-cols-[2fr_2fr_1fr_1fr] gap-4 items-center mb-8"
+            aria-label={`Товар ${item.name}`}
+        >
             <div className="flex items-center gap-4">
                 <Image
                     src={item.imageUrl || ''}
@@ -29,10 +47,10 @@ export const OrderItemRow = ({item, onChangeQuantity, onRemove}: Props) => {
                 <span>{item.name}</span>
             </div>
 
-            <div className="flex items-center gap-2">
+            <div className="flex justify-center items-center gap-2">
                 <button
-                    onClick={() => onChangeQuantity(id, -1)}
-                    className="bg-black text-white w-8 h-8 flex items-center justify-center rounded"
+                    onClick={() => onChangeQuantity && onChangeQuantity(id, -1)}
+                    className="bg-black text-white w-8 h-8 flex items-center justify-center rounded hover:bg-gray-700"
                     aria-label={`Уменьшить количество ${item.name}`}
                 >
                     <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
@@ -41,12 +59,12 @@ export const OrderItemRow = ({item, onChangeQuantity, onRemove}: Props) => {
                         <path d="M5 12h14"/>
                     </svg>
                 </button>
-                <div className="w-18 h-8 flex items-center justify-center border rounded">
+                <div className="w-16 h-8 flex items-center justify-center border rounded">
                     {item.quantitySelected}
                 </div>
                 <button
-                    onClick={() => onChangeQuantity(id, 1)}
-                    className="bg-black text-white w-8 h-8 flex items-center justify-center rounded"
+                    onClick={() => onChangeQuantity && onChangeQuantity(id, 1)}
+                    className="bg-black text-white w-8 h-8 flex items-center justify-center rounded hover:bg-gray-700"
                     aria-label={`Увеличить количество ${item.name}`}
                 >
                     <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
@@ -58,11 +76,13 @@ export const OrderItemRow = ({item, onChangeQuantity, onRemove}: Props) => {
                 </button>
             </div>
 
-            <div>{(price * item.quantitySelected)} руб.</div>
+            <div className="flex justify-center font-semibold">
+                {(price * item.quantitySelected)} руб.
+            </div>
 
             <button
-                onClick={() => onRemove(id)}
-                className="text-black hover:text-gray-700"
+                onClick={() => onRemove && onRemove(id)}
+                className="text-black hover:text-gray-700 flex justify-end"
                 aria-label="Удалить товар"
                 title="Удалить товар"
             >
