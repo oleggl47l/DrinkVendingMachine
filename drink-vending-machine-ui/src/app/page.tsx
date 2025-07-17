@@ -3,8 +3,12 @@
 import {useDrinks} from "@/hooks/use-drinks";
 import {DrinkFilters} from "@/components/drinks/drink-filter";
 import {DrinkList} from "@/components/drinks/drink-list";
+import {useVendingLock} from "@/hooks/use-vending-lock";
+import {LockedScreen} from "@/components/ui/locked-screen";
 
 export default function Home() {
+    const { isLocked, refreshLock } = useVendingLock();
+
     const {
         drinks,
         brands,
@@ -17,6 +21,10 @@ export default function Home() {
         selectedDrinkIds,
         toggleSelectDrink
     } = useDrinks();
+
+    if (isLocked) {
+        return <LockedScreen onRefreshAAction={refreshLock} />;
+    }
 
     return (
         <div className="container mx-auto px-4 py-8">
