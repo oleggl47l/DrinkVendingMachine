@@ -1,7 +1,9 @@
 using DrinkVendingMachine.Api.Extensions;
 using DrinkVendingMachine.Api.Options;
 using DrinkVendingMachine.Application.Extensions;
+using DrinkVendingMachine.Infrastructure.Data;
 using DrinkVendingMachine.Infrastructure.Extensions;
+using Microsoft.EntityFrameworkCore;
 using Serilog;
 
 Log.Logger = new LoggerConfiguration()
@@ -25,6 +27,16 @@ try
     builder.Services.AddApplicationServices();
 
     var app = builder.Build();
+    
+    using (var scope = app.Services.CreateScope())
+    {
+        var services = scope.ServiceProvider;
+                
+        var context = services.GetRequiredService<ApplicationDbContext>();
+        if (context.Database.GetPendingMigrations().Any())
+            context.Database.Migrate();
+    }
+    
     app.UseApiMiddleware(app.Environment, swaggerDocOptions);
     app.MapControllers();
 
