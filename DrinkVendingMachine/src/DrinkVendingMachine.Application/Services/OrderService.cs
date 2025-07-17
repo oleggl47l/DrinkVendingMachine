@@ -152,8 +152,9 @@ public class OrderService(
             await orderRepository.AddAsync(order, cancellationToken);
 
             return new OrderResultDto(
-                "Спасибо за вашу покупку, пожалуйста, возьмите вашу сдачу.",
-                changeToGive,
+                changeToGive
+                    .OrderBy(pair => pair.Key)
+                    .ToDictionary(pair => pair.Key, pair => pair.Value),
                 changeAmount
             );
         }, cancellationToken);
