@@ -1,15 +1,16 @@
 import {useState, useEffect} from 'react';
 import {BrandModel, BrandService, DrinkModel, DrinkService} from "@/app/api/drink-vending-machine";
 import {debounce} from "next/dist/server/utils";
+import {useOrderContext} from "@/context/order-context";
 
-export const useDrinks = () => {
+export const useDrinks = (syncWithSelectedIds?: (ids: Set<number>) => void) => {
+    const {addItem, removeItem, selectedDrinkIds} = useOrderContext();
     const [drinks, setDrinks] = useState<DrinkModel[]>([]);
     const [brands, setBrands] = useState<BrandModel[]>([]);
     const [selectedBrand, setSelectedBrand] = useState<number | null>(null);
     const [priceBounds, setPriceBounds] = useState<[number, number]>([0, 1000]);
     const [selectedRange, setSelectedRange] = useState<[number, number]>([0, 1000]);
     const [loading, setLoading] = useState(true);
-    const [selectedDrinkIds, setSelectedDrinkIds] = useState<Set<number>>(new Set());
 
     const loadInitialData = async () => {
         try {
@@ -85,15 +86,25 @@ export const useDrinks = () => {
     };
 
     const toggleSelectDrink = (id: number) => {
-        setSelectedDrinkIds((prev) => {
-            const newSet = new Set(prev);
-            if (newSet.has(id)) {
-                newSet.delete(id);
-            } else {
-                newSet.add(id);
+        const isSelected = selectedDrinkIds.has(id);
+
+        if (isSelected) {
+            removeItem(id);
+        } else {
+            const drink = drinks.find(d => d.id === id);
+            if (drink) {
+                addItem([{...drink, quantitySelected: 1}]);
             }
-            return newSet;
-        });
+        }
+
+        const updatedSet = new Set(selectedDrinkIds);
+        if (isSelected) {
+            updatedSet.delete(id);
+        } else {
+            updatedSet.add(id);
+        }
+
+        syncWithSelectedIds?.(updatedSet);
     };
 
     const handlePriceChange = debounce(async (newRange: [number, number]) => {
@@ -125,7 +136,6 @@ export const useDrinks = () => {
 
         void fetchData();
     }, []);
-
 
     return {
         drinks,

@@ -3,6 +3,7 @@ import {Geist, Geist_Mono} from "next/font/google";
 import "./globals.css";
 import React from "react";
 import {VendingLockGuard} from "@/components/ui/vending-lock-guard";
+import {OrderProvider} from "@/context/order-context";
 
 const geistSans = Geist({
     variable: "--font-geist-sans",
@@ -30,7 +31,9 @@ export default function RootLayout({
             className={`${geistSans.variable} ${geistMono.variable} antialiased`}
         >
         <VendingLockGuard>
-            {children}
+            <OrderProvider>
+                {children}
+            </OrderProvider>
         </VendingLockGuard>
         </body>
         </html>

@@ -5,9 +5,11 @@ import {DrinkFilters} from "@/components/drinks/drink-filter";
 import {DrinkList} from "@/components/drinks/drink-list";
 import {useRouter} from "next/navigation";
 import {DrinkImport} from "@/components/drinks/drink-import";
+import {useOrderContext} from "@/context/order-context";
 
 export default function CatalogPage() {
     const router = useRouter();
+    const {addItem} = useOrderContext();
 
     const {
         drinks,
@@ -23,8 +25,17 @@ export default function CatalogPage() {
         refreshDrinks
     } = useDrinks();
 
-    const goToOrderPage = () => {
-        localStorage.setItem('selectedDrinkIds', JSON.stringify(Array.from(selectedDrinkIds)));
+    const goToOrderPage = async () => {
+        const selected = drinks.filter(d => selectedDrinkIds.has(d.id!));
+        const orderItems = selected
+            .filter(d => d.id != null)
+            .map(drink => ({
+                ...drink,
+                quantitySelected: 1,
+            }));
+
+
+        addItem(orderItems);
         router.push('/order');
     };
 

@@ -1,14 +1,13 @@
 'use client';
 
 import {OrderItemRow} from '@/components/order/order-item-row';
-import {useOrder} from '@/hooks/use-order';
+import {useOrderContext} from "@/context/order-context";
 
 export default function OrderPage() {
-    const {orderItems, total, changeQuantity, removeItem} = useOrder();
+    const {orderItems, total, changeQuantity, removeItem} = useOrderContext();
 
     return (
-
-        <main className="container mx-auto px-4 py-8">
+        <div className="container mx-auto px-4 py-8">
             <h1 className="text-3xl font-bold mb-6">Оформление заказа</h1>
 
             <section
@@ -63,6 +62,6 @@ export default function OrderPage() {
                 </div>
             </div>
 
-        </main>
+        </div>
     );
 }
