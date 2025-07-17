@@ -4,26 +4,62 @@ import {useOrderContext} from "@/context/order-context";
 import {usePayment} from "@/hooks/use-payment";
 import {CoinRow} from "@/components/payment/coin-row";
 import {PaymentSummary} from "@/components/payment/payment-summary";
-import {useEffect} from "react";
+import {useEffect, useState} from "react";
 import {useRouter} from "next/navigation";
+import {OrderService} from "@/app/api/drink-vending-machine";
 
 export default function PaymentPage() {
     const router = useRouter();
-    const {total: orderTotal, orderItems, isHydrated} = useOrderContext();
+    const {total: orderTotal, orderItems, isHydrated, removeItem} = useOrderContext();
     const {coins, totalInserted, changeCount, isLoaded} = usePayment();
+    const [loading, setLoading] = useState(false);
+    const [isPaid, setIsPaid] = useState(false);
 
     useEffect(() => {
         if (!isHydrated) return;
-        if (orderItems.length === 0) {
+        if (orderItems.length === 0 && !isPaid) {
             router.replace('/catalog');
         }
-    }, [orderItems, isHydrated, router]);
+    }, [orderItems, isHydrated, router, isPaid]);
 
     if (!isHydrated || orderItems.length === 0) {
         return null;
     }
 
     const isEnough = totalInserted >= orderTotal;
+
+    const handlePayment = async () => {
+        setLoading(true);
+        try {
+            const orderCreateModel = {
+                items: orderItems.map(item => ({
+                    drinkId: item.id,
+                    quantity: item.quantitySelected,
+                })),
+                coinsInserted: coins
+                    .filter(c => c.countSelected > 0)
+                    .map(c => ({
+                        id: c.id,
+                        quantity: c.countSelected,
+                    })),
+            };
+
+            const result = await OrderService.createOrder({requestBody: orderCreateModel});
+
+            orderItems.forEach(item => removeItem(item.id!));
+
+            sessionStorage.setItem('paymentChangeAmount', String(result.changeAmount ?? 0));
+            sessionStorage.setItem('paymentChangeCoins', JSON.stringify(result.change ?? {}));
+
+            setIsPaid(true);
+            router.push('/payment-success');
+        } catch (error) {
+            alert('Ошибка при оплате, попробуйте ещё раз');
+            console.error(error);
+        } finally {
+            setLoading(false);
+        }
+    };
 
     return (
         <div className="container mx-auto px-4 py-8">
@@ -59,11 +95,11 @@ export default function PaymentPage() {
                     Вернуться
                 </button>
                 <button
-                    onClick={() => alert('Оплата не реализована')}
-                    disabled={!isEnough}
+                    onClick={handlePayment}
+                    disabled={!isEnough || loading}
                     className="bg-green-600 text-white hover:bg-green-700 px-20 py-3 rounded disabled:opacity-50"
                 >
-                    Оплатить
+                    {loading ? 'Оплата...' : 'Оплатить'}
                 </button>
             </div>
         </div>

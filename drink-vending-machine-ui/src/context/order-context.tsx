@@ -13,7 +13,6 @@ interface OrderContextType {
     total: number;
     changeQuantity: (id: number, delta: number) => void;
     removeItem: (id: number) => void;
-    setItemsFromStorage: () => void;
     addItem: (item: OrderItem[]) => void;
     syncWithSelectedIds: (ids: Set<number>) => void;
     isHydrated: boolean;
@@ -36,29 +35,6 @@ export const OrderProvider = ({children}: { children: React.ReactNode }) => {
 
     const [total, setTotal] = useState(0);
     const [isHydrated, setIsHydrated] = useState(false);
-
-    const setItemsFromStorage = async () => {
-        const storedItems = localStorage.getItem('selectedOrderItems');
-        if (!storedItems) return;
-
-        try {
-            const parsed: { id: number; quantitySelected: number }[] = JSON.parse(storedItems);
-            const allDrinks = await DrinkService.getAllDrinks({});
-            const selected = allDrinks.filter(d => parsed.some(p => p.id === d.id));
-
-            const mapped = selected.map(d => {
-                const match = parsed.find(p => p.id === d.id)!;
-                return {
-                    ...d,
-                    quantitySelected: match.quantitySelected,
-                };
-            });
-
-            setOrderItems(mapped);
-        } catch (e) {
-            console.error('Error loading order items from storage:', e);
-        }
-    };
 
     const syncWithSelectedIds = (ids: Set<number>) => {
         setOrderItems(prev => prev.filter(item => ids.has(item.id!)));
@@ -90,16 +66,14 @@ export const OrderProvider = ({children}: { children: React.ReactNode }) => {
             }
         };
 
-        loadFromStorage();
+        void loadFromStorage();
     }, []);
 
-    // Расчет общей суммы
     useEffect(() => {
         const sum = orderItems.reduce((acc, item) => acc + (item.price || 0) * item.quantitySelected, 0);
         setTotal(sum);
     }, [orderItems]);
 
-    // Сохранение в localStorage
     useEffect(() => {
         if (!isHydrated) return;
 
@@ -154,7 +128,6 @@ export const OrderProvider = ({children}: { children: React.ReactNode }) => {
             total,
             changeQuantity,
             removeItem,
-            setItemsFromStorage,
             addItem,
             syncWithSelectedIds,
             selectedDrinkIds,

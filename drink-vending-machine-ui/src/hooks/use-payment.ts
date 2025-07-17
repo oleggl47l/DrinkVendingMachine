@@ -31,9 +31,8 @@ export function usePayment() {
         setCoins(prev =>
             prev.map(c => {
                 if (c.id === id) {
-                    const max = c.quantity ?? Infinity;
                     const newCount = c.countSelected + delta;
-                    if (newCount < 0 || newCount > max) return c;
+                    if (newCount < 0) return c;
                     return {...c, countSelected: newCount};
                 }
                 return c;

@@ -38,7 +38,6 @@ export const CoinRow = ({coin, onChange}: CoinRowProps) => {
                 <button
                     onClick={() => onChange(coin.id, 1)}
                     className="bg-black text-white w-8 h-8 flex items-center justify-center rounded"
-                    disabled={coin.countSelected >= (coin.quantity ?? Infinity)}
                 >
                     <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
                          stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
