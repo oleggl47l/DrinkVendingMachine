@@ -2,4 +2,7 @@
 
 namespace DrinkVendingMachine.Domain.Interfaces;
 
-public interface ICoinRepository : IRepository<Coin>;
+public interface ICoinRepository : IRepository<Coin>
+{
+    Task<IEnumerable<Coin>> GetAllSortedByNominalAsync(CancellationToken cancellationToken = default);
+}

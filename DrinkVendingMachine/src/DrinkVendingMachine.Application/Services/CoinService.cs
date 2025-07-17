@@ -10,7 +10,7 @@ public class CoinService(ICoinRepository coinRepository) : ICoinService
 {
     public async Task<List<CoinModel>> GetAllAsync(CancellationToken cancellationToken)
     {
-        var coins = await coinRepository.GetAllAsync(cancellationToken);
+        var coins = await coinRepository.GetAllSortedByNominalAsync(cancellationToken);
         return coins.Select(MapToModel).ToList();
     }
 
