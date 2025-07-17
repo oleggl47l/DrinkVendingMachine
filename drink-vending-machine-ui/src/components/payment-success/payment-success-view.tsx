@@ -14,10 +14,11 @@ export const PaymentSuccessView: React.FC<Props> = ({
                                                         onReturnToCatalog,
                                                     }) => {
     return (
-        <div className="container mx-auto px-4 py-8 text-center">
-            <h1 className="text-3xl font-bold mb-6">Спасибо за покупку!</h1>
+        <div
+            className="container mx-auto px-4 py-8 flex flex-col justify-center items-center min-h-[100vh] text-center">
+            <h1 className="text-3xl font-bold mb-4">Спасибо за покупку!</h1>
 
-            <p className="mb-6 text-2xl">
+            <p className="mb-8 text-3xl">
                 Пожалуйста, возьмите вашу сдачу:{" "}
                 <span className="text-green-600 font-semibold">{changeAmount} руб</span>
             </p>
@@ -33,7 +34,8 @@ export const PaymentSuccessView: React.FC<Props> = ({
                                     className="flex items-center justify-between gap-6 text-lg mb-6"
                                 >
                                     <div className="flex items-center gap-4">
-                                        <div className="w-12 h-12 rounded-full border-2 border-gray-600 bg-gray-300 text-gray-800 flex items-center justify-center font-semibold text-lg">
+                                        <div
+                                            className="w-12 h-12 rounded-full border-2 border-gray-600 bg-gray-300 text-gray-800 flex items-center justify-center font-semibold text-lg">
                                             {nominal}
                                         </div>
                                     </div>
@@ -50,7 +52,7 @@ export const PaymentSuccessView: React.FC<Props> = ({
 
             <button
                 onClick={onReturnToCatalog}
-                className="bg-yellow-400 px-6 py-3  text-black rounded hover:bg-yellow-500 transition"
+                className="bg-yellow-400 px-6 py-3 text-black rounded hover:bg-yellow-500 transition"
             >
                 Каталог напитков
             </button>
