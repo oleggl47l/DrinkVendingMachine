@@ -5,9 +5,11 @@ import {DrinkFilters} from "@/components/drinks/drink-filter";
 import {DrinkList} from "@/components/drinks/drink-list";
 import {useVendingLock} from "@/hooks/use-vending-lock";
 import {LockedScreen} from "@/components/ui/locked-screen";
+import {useRouter} from "next/navigation";
 
 export default function CatalogPage() {
-    const { isLocked, refreshLock } = useVendingLock();
+    const {isLocked, refreshLock} = useVendingLock();
+    const router = useRouter();
 
     const {
         drinks,
@@ -22,8 +24,13 @@ export default function CatalogPage() {
         toggleSelectDrink
     } = useDrinks();
 
+    const goToOrderPage = () => {
+        localStorage.setItem('selectedDrinkIds', JSON.stringify(Array.from(selectedDrinkIds)));
+        router.push('/order');
+    };
+
     if (isLocked) {
-        return <LockedScreen onRefreshAAction={refreshLock} />;
+        return <LockedScreen onRefreshAAction={refreshLock}/>;
     }
 
     return (
@@ -44,7 +51,9 @@ export default function CatalogPage() {
                     <button className="bg-gray-200 text-gray-800 px-4 py-3 rounded">
                         Импорт
                     </button>
-                    <button className="bg-green-600 text-white px-4 py-3 rounded">
+                    <button className="bg-green-600 text-white px-4 py-3 rounded hover:bg-green-700"
+                            onClick={goToOrderPage}
+                    >
                         Выбрано: {selectedDrinkIds.size}
                     </button>
                 </div>
