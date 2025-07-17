@@ -7,6 +7,7 @@ import {PaymentSummary} from "@/components/payment/payment-summary";
 import {useEffect, useState} from "react";
 import {useRouter} from "next/navigation";
 import {OrderService} from "@/app/api/drink-vending-machine";
+import {Loading} from "@/components/ui/loading";
 
 export default function PaymentPage() {
     const router = useRouter();
@@ -79,7 +80,7 @@ export default function PaymentPage() {
                 aria-label="Монеты для оплаты"
             >
                 {!isLoaded ? (
-                    <p>Загрузка...</p>
+                    <Loading />
                 ) : (
                     coins.map(coin => (
                         <CoinRow key={coin.id} coin={coin} onChange={changeCount}/>

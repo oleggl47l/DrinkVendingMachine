@@ -2,6 +2,7 @@
 
 import React, {createContext, useContext, useEffect, useMemo, useState} from 'react';
 import {DrinkModel, DrinkService} from '@/app/api/drink-vending-machine';
+import {Loading} from "@/components/ui/loading";
 
 export interface OrderItem extends DrinkModel {
     quantitySelected: number;
@@ -136,7 +137,7 @@ export const OrderProvider = ({children}: { children: React.ReactNode }) => {
     }, [isHydrated, orderItems, total]);
 
     if (!isHydrated) {
-        return 'Загрузка';
+        return <Loading />;
     }
 
     return <OrderContext.Provider value={value}>{children}</OrderContext.Provider>;
