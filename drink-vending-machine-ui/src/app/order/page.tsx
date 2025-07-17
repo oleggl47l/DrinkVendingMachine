@@ -3,14 +3,16 @@
 import {OrderItemRow} from '@/components/order/order-item-row';
 import {useOrderContext} from "@/context/order-context";
 import {useRouter} from "next/navigation";
+import {useToast} from "@/components/ui/toast";
 
 export default function OrderPage() {
     const router = useRouter();
     const {orderItems, total, changeQuantity, removeItem} = useOrderContext();
+    const { showToast } = useToast();
 
     const handleGoToPayment = () => {
         if (orderItems.length === 0) {
-            alert('Корзина пуста. Добавьте товары, чтобы перейти к оплате.');
+            showToast('Корзина пуста. Добавьте товары, чтобы перейти к оплате.', 'error');
             return;
         }
         router.push('/payment');

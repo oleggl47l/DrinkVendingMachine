@@ -8,6 +8,7 @@ import {useEffect, useState} from "react";
 import {useRouter} from "next/navigation";
 import {OrderService} from "@/app/api/drink-vending-machine";
 import {Loading} from "@/components/ui/loading";
+import {useToast} from "@/components/ui/toast";
 
 export default function PaymentPage() {
     const router = useRouter();
@@ -15,6 +16,7 @@ export default function PaymentPage() {
     const {coins, totalInserted, changeCount, isLoaded} = usePayment();
     const [loading, setLoading] = useState(false);
     const [isPaid, setIsPaid] = useState(false);
+    const { showToast } = useToast();
 
     useEffect(() => {
         if (!isHydrated) return;
@@ -55,7 +57,7 @@ export default function PaymentPage() {
             setIsPaid(true);
             router.push('/payment-success');
         } catch (error) {
-            alert('Ошибка при оплате, попробуйте ещё раз');
+            showToast('Ошибка при оплате, попробуйте ещё раз', 'error');
             console.error(error);
         } finally {
             setLoading(false);

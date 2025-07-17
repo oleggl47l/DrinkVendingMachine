@@ -2,6 +2,7 @@
 
 import {DrinkService} from "@/app/api/drink-vending-machine";
 import {ChangeEvent, useRef, useState} from "react";
+import {useToast} from "@/components/ui/toast";
 
 interface Props {
     onImportSuccess?: () => void;
@@ -11,6 +12,7 @@ export const DrinkImport = ({onImportSuccess}: Props) => {
     const fileInputRef = useRef<HTMLInputElement>(null);
     const [uploading, setUploading] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    const { showToast } = useToast();
 
     const handleFileChange = async (e: ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
@@ -32,10 +34,10 @@ export const DrinkImport = ({onImportSuccess}: Props) => {
                 fileInputRef.current.value = "";
             }
 
-            alert("Импорт успешно завершён");
+            showToast("Импорт успешно завершён", "success");
         } catch (e) {
             console.error("Ошибка при импорте:", e);
-            setError("Не удалось импортировать файл.");
+            showToast("Не удалось импортировать файл", "error");
         } finally {
             setUploading(false);
         }

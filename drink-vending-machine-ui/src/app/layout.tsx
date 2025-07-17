@@ -4,6 +4,7 @@ import "./globals.css";
 import React from "react";
 import {VendingLockGuard} from "@/components/ui/vending-lock-guard";
 import {OrderProvider} from "@/context/order-context";
+import {ToastProvider} from "@/components/ui/toast";
 
 const geistSans = Geist({
     variable: "--font-geist-sans",
@@ -30,11 +31,14 @@ export default function RootLayout({
         <body
             className={`${geistSans.variable} ${geistMono.variable} antialiased`}
         >
-        <VendingLockGuard>
-            <OrderProvider>
-                {children}
-            </OrderProvider>
-        </VendingLockGuard>
+
+        <ToastProvider>
+            <VendingLockGuard>
+                <OrderProvider>
+                    {children}
+                </OrderProvider>
+            </VendingLockGuard>
+        </ToastProvider>
         </body>
         </html>
     );
