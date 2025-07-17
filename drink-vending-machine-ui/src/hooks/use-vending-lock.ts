@@ -1,6 +1,6 @@
 import {useEffect, useState, useRef, useCallback} from 'react';
 import {VendingService} from '@/app/api/drink-vending-machine';
-import {getOrCreateClientId} from "@/app/utils/client-id";
+import {getOrCreateClientId} from "@/utils/client-id";
 
 export const useVendingLock = () => {
     const [lockedByOther, setLockedByOther] = useState(false);
