@@ -13,7 +13,7 @@ export default function OrderPage() {
 
             <section
                 aria-label="Заголовок корзины с товарами"
-                className="grid grid-cols-[1fr_300px_100px_40px] gap-4 font-semibold mb-4"
+                className="grid grid-cols-[1fr_300px_150px_40px] gap-4 font-semibold mb-4"
             >
                 <div>Товар</div>
                 <div>Количество</div>

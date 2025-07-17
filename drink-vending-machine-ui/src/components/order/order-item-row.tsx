@@ -17,7 +17,7 @@ export const OrderItemRow = ({item, onChangeQuantity, onRemove}: Props) => {
     }
 
     return (
-        <div className="grid grid-cols-[1fr_328px_100px_40px] gap-4 items-center mb-4">
+        <div className="grid grid-cols-[1fr_328px_150px_40px] gap-4 items-center mb-4 h-24">
             <div className="flex items-center gap-4">
                 <Image
                     src={item.imageUrl || ''}
