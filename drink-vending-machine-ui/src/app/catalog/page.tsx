@@ -3,12 +3,9 @@
 import {useDrinks} from "@/hooks/use-drinks";
 import {DrinkFilters} from "@/components/drinks/drink-filter";
 import {DrinkList} from "@/components/drinks/drink-list";
-import {useVendingLock} from "@/hooks/use-vending-lock";
-import {LockedScreen} from "@/components/ui/locked-screen";
 import {useRouter} from "next/navigation";
 
 export default function CatalogPage() {
-    const {isLocked, refreshLock} = useVendingLock();
     const router = useRouter();
 
     const {
@@ -28,10 +25,6 @@ export default function CatalogPage() {
         localStorage.setItem('selectedDrinkIds', JSON.stringify(Array.from(selectedDrinkIds)));
         router.push('/order');
     };
-
-    if (isLocked) {
-        return <LockedScreen onRefreshAAction={refreshLock}/>;
-    }
 
     return (
         <div className="container mx-auto px-4 py-8">
