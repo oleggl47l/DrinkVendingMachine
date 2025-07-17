@@ -64,7 +64,7 @@ export const DrinkFilters = ({
                     onChange={handleSliderChange}
                     onMouseUp={handleSliderRelease}
                     onTouchEnd={handleSliderRelease}
-                    className="flex-1"
+                    className="flex-1 accent-gray-500 transition-opacity duration-300 ease-in-out hover:opacity-85"
                 />
             </div>
         </div>
