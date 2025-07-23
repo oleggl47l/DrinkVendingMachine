@@ -3,14 +3,10 @@
 import {useDrinks} from "@/hooks/use-drinks";
 import {DrinkFilters} from "@/components/drinks/drink-filter";
 import {DrinkList} from "@/components/drinks/drink-list";
-import {useRouter} from "next/navigation";
 import {DrinkImport} from "@/components/drinks/drink-import";
-import {useOrderContext} from "@/context/order-context";
+import {useDrinkSelection} from "@/hooks/catalog/use-drink-selection";
 
 export default function CatalogPage() {
-    const router = useRouter();
-    const {addItem} = useOrderContext();
-
     const {
         drinks,
         brands,
@@ -25,19 +21,7 @@ export default function CatalogPage() {
         refreshDrinks
     } = useDrinks();
 
-    const goToOrderPage = async () => {
-        const selected = drinks.filter(d => selectedDrinkIds.has(d.id!));
-        const orderItems = selected
-            .filter(d => d.id != null)
-            .map(drink => ({
-                ...drink,
-                quantitySelected: 1,
-            }));
-
-
-        addItem(orderItems);
-        router.push('/order');
-    };
+    const {goToOrderPage, selectedCount} = useDrinkSelection(drinks, selectedDrinkIds);
 
     return (
         <div className="container mx-auto px-4 py-8">
@@ -58,9 +42,9 @@ export default function CatalogPage() {
                     <button
                         className="bg-green-600 text-white px-4 py-3 rounded hover:bg-green-700 disabled:bg-gray-400"
                         onClick={goToOrderPage}
-                        disabled={selectedDrinkIds.size === 0}
+                        disabled={selectedCount === 0}
                     >
-                        Выбрано: {selectedDrinkIds.size}
+                        Выбрано: {selectedCount}
                     </button>
                 </div>
             </div>
