@@ -1,5 +1,6 @@
 import {BrandModel} from "@/app/api/drink-vending-machine";
-import React, {useState, useEffect, useRef} from "react";
+import React from "react";
+import {usePriceSlider} from "@/hooks/catalog/use-price-slider";
 
 export const DrinkFilters = ({
                                  brands,
@@ -16,44 +17,15 @@ export const DrinkFilters = ({
     onBrandChange: (brandId: number | null) => void;
     onPriceChange: (newRange: [number, number]) => void;
 }) => {
-    const [currentMaxPrice, setCurrentMaxPrice] = useState(selectedRange[1]);
-    const [showTooltip, setShowTooltip] = useState(false);
-    const [tooltipPosition, setTooltipPosition] = useState(0);
-    const sliderRef = useRef<HTMLInputElement>(null);
-
-    useEffect(() => {
-        setCurrentMaxPrice(selectedRange[1]);
-    }, [selectedRange]);
-
-    const updateTooltip = (value: number) => {
-        if (!sliderRef.current) return;
-
-        const min = Number(sliderRef.current.min);
-        const max = Number(sliderRef.current.max);
-
-        setTooltipPosition(((value - min) / (max - min)) * 100);
-    };
-
-    const handleSliderChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const newValue = Number(e.target.value);
-        setCurrentMaxPrice(newValue);
-        setShowTooltip(true);
-        updateTooltip(newValue);
-    };
-
-    const handleSliderRelease = () => {
-        setShowTooltip(false);
-        onPriceChange([priceBounds[0], currentMaxPrice]);
-    };
-
-    const handleMouseEnter = () => {
-        setShowTooltip(true);
-        updateTooltip(currentMaxPrice);
-    };
-
-    const handleMouseLeave = () => {
-        setShowTooltip(false);
-    };
+    const {
+        currentValue,
+        showTooltip,
+        tooltipPosition,
+        sliderRef,
+        handleChange,
+        hideTooltip,
+        showTooltipOnHover
+    } = usePriceSlider(selectedRange[1]);
 
     return (
         <div className="grid md:grid-cols-2 gap-10">
@@ -87,13 +59,19 @@ export const DrinkFilters = ({
                     type="range"
                     min={priceBounds[0]}
                     max={priceBounds[1]}
-                    value={currentMaxPrice}
-                    onChange={handleSliderChange}
-                    onMouseUp={handleSliderRelease}
-                    onTouchEnd={handleSliderRelease}
-                    onMouseEnter={handleMouseEnter}
-                    onMouseLeave={handleMouseLeave}
-                    className="flex-1 accent-gray-500 transition-opacity duration-300 ease-in-out hover:opacity-85"
+                    value={currentValue}
+                    onChange={(e) => handleChange(Number(e.target.value))}
+                    onMouseUp={() => {
+                        hideTooltip();
+                        onPriceChange([priceBounds[0], currentValue]);
+                    }}
+                    onTouchEnd={() => {
+                        hideTooltip();
+                        onPriceChange([priceBounds[0], currentValue]);
+                    }}
+                    onMouseEnter={showTooltipOnHover}
+                    onMouseLeave={hideTooltip}
+                    className="accent-gray-500 transition-opacity duration-300 ease-in-out hover:opacity-85"
                 />
 
                 {showTooltip && (
@@ -115,9 +93,8 @@ export const DrinkFilters = ({
                             zIndex: 10,
                         }}
                     >
-                        {currentMaxPrice} руб.
+                        {currentValue} руб.
                     </div>
-
                 )}
             </div>
         </div>
