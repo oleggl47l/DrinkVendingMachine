@@ -55,8 +55,10 @@ export default function CatalogPage() {
                 </div>
                 <div className="flex flex-col space-y-7">
                     <DrinkImport onImportSuccess={() => refreshDrinks()}/>
-                    <button className="bg-green-600 text-white px-4 py-3 rounded hover:bg-green-700"
-                            onClick={goToOrderPage}
+                    <button
+                        className="bg-green-600 text-white px-4 py-3 rounded hover:bg-green-700 disabled:bg-gray-400"
+                        onClick={goToOrderPage}
+                        disabled={selectedDrinkIds.size === 0}
                     >
                         Выбрано: {selectedDrinkIds.size}
                     </button>
