@@ -1,7 +1,6 @@
 ﻿using DrinkVendingMachine.Application.DTOs.Coin;
 using DrinkVendingMachine.Application.Services.Interfaces;
 using DrinkVendingMachine.Domain.Entities;
-using DrinkVendingMachine.Domain.Exceptions.Coin;
 using DrinkVendingMachine.Domain.Interfaces;
 
 namespace DrinkVendingMachine.Application.Services;
@@ -18,7 +17,7 @@ public class CoinService(ICoinRepository coinRepository) : ICoinService
     {
         var coin = await coinRepository.GetByIdAsync(id, cancellationToken);
         if (coin == null)
-            throw new CoinNotFoundException(id);
+            throw new KeyNotFoundException($"Coin {id} not found");
 
         return MapToModel(coin);
     }
@@ -40,7 +39,7 @@ public class CoinService(ICoinRepository coinRepository) : ICoinService
     {
         var coin = await coinRepository.GetByIdAsync(model.Id, cancellationToken);
         if (coin == null)
-            throw new CoinNotFoundException(model.Id);
+            throw new KeyNotFoundException($"Coin {model.Id} not found");
 
         coin.Nominal = model.Nominal;
         coin.Quantity = model.Quantity;
@@ -54,7 +53,7 @@ public class CoinService(ICoinRepository coinRepository) : ICoinService
     {
         var coin = await coinRepository.GetByIdAsync(id, cancellationToken);
         if (coin == null)
-            throw new CoinNotFoundException(id);
+            throw new KeyNotFoundException($"Coin {id} not found");
 
         await coinRepository.DeleteAsync(coin, cancellationToken);
     }

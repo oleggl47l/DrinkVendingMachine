@@ -1,9 +1,6 @@
 ﻿using DrinkVendingMachine.Application.DTOs.Drink;
 using DrinkVendingMachine.Application.Services.Interfaces;
 using DrinkVendingMachine.Domain.Entities;
-using DrinkVendingMachine.Domain.Exceptions.Brand;
-using DrinkVendingMachine.Domain.Exceptions.Drink;
-using DrinkVendingMachine.Domain.Exceptions.Specific.Excel;
 using DrinkVendingMachine.Domain.Interfaces;
 using OfficeOpenXml;
 
@@ -21,24 +18,24 @@ public class DrinkService(IDrinkRepository drinkRepository, IBrandRepository bra
     public async Task<DrinkModel?> GetByIdAsync(int id, CancellationToken cancellationToken)
     {
         var drink = await drinkRepository.GetByIdAsync(id, cancellationToken)
-                    ?? throw new DrinkNotFoundException(id);
+                    ?? throw new KeyNotFoundException($"Drink with id={id} not found");
         return MapToModel(drink);
     }
 
     public async Task<List<DrinkModel>> GetByBrandAsync(int brandId, CancellationToken cancellationToken)
     {
-        var drinks = await drinkRepository.GetByBrandAsync(brandId, cancellationToken) ??
-                     throw new BrandNotFoundException(brandId);
+        var drinks = await drinkRepository.GetByBrandAsync(brandId, cancellationToken) 
+                     ?? throw new KeyNotFoundException($"Brand with id={brandId} not found");
         return drinks.Select(MapToModel).ToList();
     }
 
     public async Task UpdateQuantityAsync(int id, int quantity, CancellationToken cancellationToken)
     {
         if (quantity <= 0)
-            throw new InvalidDrinkPriceException(quantity);
+            throw new ArgumentException("Quantity cannot be negative", nameof(quantity));
 
         var drink = await drinkRepository.GetByIdAsync(id, cancellationToken)
-                    ?? throw new DrinkNotFoundException(id);
+                    ?? throw new KeyNotFoundException($"Drink with id={id} not found");
 
         drink.Quantity = quantity;
         await drinkRepository.UpdateAsync(drink, cancellationToken);
@@ -47,10 +44,10 @@ public class DrinkService(IDrinkRepository drinkRepository, IBrandRepository bra
     public async Task<DrinkModel> AddAsync(DrinkCreateModel model, CancellationToken cancellationToken)
     {
         if (model.Price <= 0)
-            throw new InvalidDrinkPriceException(model.Price);
+            throw new ArgumentOutOfRangeException(nameof(model), "Price must be greater than 0");
 
         if (model.Quantity < 0)
-            throw new InvalidDrinkQuantityException(model.Quantity);
+            throw new ArgumentOutOfRangeException(nameof(model), "Quantity cannot be negative");
 
         var drink = new Drink
         {
@@ -68,17 +65,17 @@ public class DrinkService(IDrinkRepository drinkRepository, IBrandRepository bra
     public async Task<DrinkModel> UpdateAsync(DrinkUpdateModel model, CancellationToken cancellationToken)
     {
         var existing = await drinkRepository.GetByIdAsync(model.Id, cancellationToken)
-                       ?? throw new DrinkNotFoundException(model.Id);
+                       ?? throw new KeyNotFoundException($"Drink with id={model.Id} not found");
 
         if (model.Price is <= 0)
-            throw new InvalidDrinkPriceException(model.Price.Value);
+            throw new ArgumentOutOfRangeException(nameof(model), "Price must be greater than 0");
 
         if (model.Quantity is < 0)
-            throw new InvalidDrinkQuantityException(model.Quantity.Value);
+            throw new ArgumentOutOfRangeException(nameof(model), "Quantity cannot be negative");
 
         if (model.BrandId.HasValue &&
             !await brandRepository.ExistsAsync(model.BrandId.Value, cancellationToken))
-            throw new BrandNotFoundException(model.BrandId.Value);
+            throw new KeyNotFoundException($"Brand with id={model.BrandId.Value} not found");
 
         if (model.Name is not null) existing.Name = model.Name;
         if (model.Price.HasValue) existing.Price = model.Price.Value;
@@ -93,11 +90,11 @@ public class DrinkService(IDrinkRepository drinkRepository, IBrandRepository bra
     public async Task DeleteAsync(int id, CancellationToken cancellationToken)
     {
         var drink = await drinkRepository.GetByIdAsync(id, cancellationToken)
-                    ?? throw new DrinkNotFoundException(id);
+                    ?? throw new KeyNotFoundException($"Drink with id={id} not found");
 
         await drinkRepository.DeleteAsync(drink, cancellationToken);
     }
-    
+
     public async Task<PriceRangeModel> GetPriceRangeAsync(int? brandId, CancellationToken cancellationToken)
     {
         var (minPrice, maxPrice) = await drinkRepository.GetPriceRangeAsync(brandId, cancellationToken);
@@ -121,7 +118,7 @@ public class DrinkService(IDrinkRepository drinkRepository, IBrandRepository bra
         using var package = new ExcelPackage(fileStream);
 
         if (package.Workbook.Worksheets.Count == 0)
-            throw new ExcelEmptyWorksheetException();
+            throw new InvalidDataException("Excel file contains no worksheets.");
 
         var worksheet = package.Workbook.Worksheets[0];
 
@@ -143,7 +140,7 @@ public class DrinkService(IDrinkRepository drinkRepository, IBrandRepository bra
             .ToArray();
 
         if (missingColumns.Length > 0)
-            throw new ExcelMissingColumnsException(missingColumns);
+            throw new InvalidDataException($"Missing required columns: {string.Join(", ", missingColumns)}");
 
         var duplicateColumns = columnMap
             .GroupBy(x => x.Key, StringComparer.OrdinalIgnoreCase)
@@ -152,7 +149,7 @@ public class DrinkService(IDrinkRepository drinkRepository, IBrandRepository bra
             .ToArray();
 
         if (duplicateColumns.Length > 0)
-            throw new ExcelDuplicateColumnsException(duplicateColumns);
+            throw new InvalidDataException($"Duplicate columns in Excel: {string.Join(", ", duplicateColumns)}");
 
         var rowCount = worksheet.Dimension?.Rows ?? 1;
         var importedDrinks = new List<Drink>();
@@ -163,24 +160,24 @@ public class DrinkService(IDrinkRepository drinkRepository, IBrandRepository bra
             {
                 var name = worksheet.Cells[row, columnMap["Name"]].Text?.Trim();
                 if (string.IsNullOrWhiteSpace(name))
-                    throw new ExcelDataValidationException("Name", row, "Value is empty");
+                    throw new FormatException($"Row {row}: 'Name' is empty.");
 
                 var brandIdText = worksheet.Cells[row, columnMap["BrandId"]].Text;
                 if (!int.TryParse(brandIdText, out var brandId))
-                    throw new ExcelDataValidationException("BrandId", row, brandIdText);
+                    throw new FormatException($"Row {row}: Invalid BrandId '{brandIdText}'.");
 
                 var priceText = worksheet.Cells[row, columnMap["Price"]].Text;
                 if (!int.TryParse(priceText, out var price) || price <= 0)
-                    throw new ExcelDataValidationException("Price", row, priceText);
+                    throw new FormatException($"Row {row}: Invalid Price '{priceText}'.");
 
                 var quantityText = worksheet.Cells[row, columnMap["Quantity"]].Text;
                 if (!int.TryParse(quantityText, out var quantity) || quantity < 0)
-                    throw new ExcelDataValidationException("Quantity", row, quantityText);
+                    throw new FormatException($"Row {row}: Invalid Quantity '{quantityText}'.");
 
                 var imageUrl = worksheet.Cells[row, columnMap["ImageUrl"]].Text?.Trim();
 
                 if (!await brandRepository.ExistsAsync(brandId, cancellationToken))
-                    throw new ExcelBrandNotFoundException(row, brandId);
+                    throw new KeyNotFoundException($"Row {row}: Brand with id={brandId} not found.");
 
                 importedDrinks.Add(new Drink
                 {
@@ -191,9 +188,9 @@ public class DrinkService(IDrinkRepository drinkRepository, IBrandRepository bra
                     ImageUrl = string.IsNullOrWhiteSpace(imageUrl) ? null : imageUrl
                 });
             }
-            catch (KeyNotFoundException ex)
+            catch (Exception ex)
             {
-                throw new ExcelDataValidationException("Column mapping", row, ex.Message);
+                throw new FormatException($"Row {row}: Error while processing row — {ex.Message}", ex);
             }
         }
 

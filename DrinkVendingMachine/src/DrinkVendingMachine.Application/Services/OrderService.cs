@@ -2,11 +2,6 @@
 using DrinkVendingMachine.Application.DTOs.OrderItem;
 using DrinkVendingMachine.Application.Services.Interfaces;
 using DrinkVendingMachine.Domain.Entities;
-using DrinkVendingMachine.Domain.Exceptions.Brand;
-using DrinkVendingMachine.Domain.Exceptions.Coin;
-using DrinkVendingMachine.Domain.Exceptions.Drink;
-using DrinkVendingMachine.Domain.Exceptions.Order;
-using DrinkVendingMachine.Domain.Exceptions.Specific;
 using DrinkVendingMachine.Domain.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
@@ -27,7 +22,7 @@ public class OrderService(
     public async Task<OrderModel> GetOrderByIdAsync(int orderId, CancellationToken cancellationToken)
     {
         var order = await orderRepository.GetWithItemsAsync(orderId, cancellationToken)
-                    ?? throw new OrderNotFoundException(orderId);
+                    ?? throw new KeyNotFoundException($"Order with ID {orderId} not found.");
 
         return MapToModel(order);
     }
@@ -36,7 +31,7 @@ public class OrderService(
     public async Task DeleteOrderAsync(int orderId, CancellationToken cancellationToken)
     {
         var order = await orderRepository.GetWithItemsAsync(orderId, cancellationToken)
-                    ?? throw new OrderNotFoundException(orderId);
+                    ?? throw new KeyNotFoundException($"Order with ID {orderId} not found.");
 
         await orderRepository.DeleteAsync(order, cancellationToken);
     }
@@ -59,6 +54,15 @@ public class OrderService(
 
     public async Task<OrderResultDto> CreateOrderAsync(OrderCreateModel model, CancellationToken cancellationToken)
     {
+        if (model.Items == null || !model.Items.Any())
+            throw new ArgumentException("Order must contain at least one drink.", nameof(model));
+
+        foreach (var item in model.Items.Where(item => item.Quantity <= 0))
+            throw new ArgumentOutOfRangeException(nameof(model), $"Drink quantity must be more than 0 (got {item.Quantity}).");
+
+        foreach (var coin in model.CoinsInserted.Where(coin => coin.Quantity < 0))
+            throw new ArgumentOutOfRangeException(nameof(model), $"Coin quantity must not be negative (got {coin.Quantity}).");
+        
         return await unitOfWork.ExecuteInTransactionAsync(async () =>
         {
             var drinks = (await drinkRepository.GetWhereAsync(
@@ -75,10 +79,10 @@ public class OrderService(
             var orderTotal = model.Items.Sum(item =>
             {
                 if (!drinksDict.TryGetValue(item.DrinkId, out var drink))
-                    throw new DrinkNotFoundException(item.DrinkId);
+                    throw new KeyNotFoundException($"Drink with ID {item.DrinkId} not found");
 
                 if (drink.Quantity < item.Quantity)
-                    throw new NotEnoughDrinkStockException(drink.Name);
+                    throw new InvalidOperationException($"Not enough stock for drink '{drink.Name}'.");
 
                 return drink.Price * item.Quantity;
             });
@@ -87,13 +91,13 @@ public class OrderService(
             var insertedTotal = model.CoinsInserted.Sum(coinModel =>
             {
                 if (!coinsDict.TryGetValue(coinModel.Id, out var coin))
-                    throw new CoinNotFoundException(coinModel.Id);
+                    throw new KeyNotFoundException($"Coin with ID {coinModel.Id} not found.");
 
                 return coin.Nominal * coinModel.Quantity;
             });
 
             if (insertedTotal < orderTotal)
-                throw new NotEnoughMoneyInsertedException(orderTotal, insertedTotal);
+                throw new InvalidOperationException($"Not enough money inserted. Required: {orderTotal}, inserted: {insertedTotal}.");
 
             foreach (var coinModel in model.CoinsInserted)
             {
@@ -197,7 +201,7 @@ public class OrderService(
         }
 
         if (dp[changeAmount] >= inf)
-            throw new UnableToGiveChangeException(changeAmount);
+            throw new InvalidOperationException($"Unable to give change for amount: {changeAmount}");
 
         var result = new Dictionary<int, int>();
         var cur = changeAmount;

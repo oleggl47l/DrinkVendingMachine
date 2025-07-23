@@ -1,7 +1,6 @@
 ﻿using DrinkVendingMachine.Application.DTOs.Brand;
 using DrinkVendingMachine.Application.Services.Interfaces;
 using DrinkVendingMachine.Domain.Entities;
-using DrinkVendingMachine.Domain.Exceptions.Brand;
 using DrinkVendingMachine.Domain.Interfaces;
 
 namespace DrinkVendingMachine.Application.Services;
@@ -17,16 +16,19 @@ public class BrandService(IBrandRepository brandRepository) : IBrandService
     public async Task<BrandModel?> GetByIdAsync(int id, CancellationToken cancellationToken)
     {
         var brand = await brandRepository.GetByIdAsync(id, cancellationToken)
-                    ?? throw new BrandNotFoundException(id);
+                    ?? throw new KeyNotFoundException($"Brand with ID {id} not found.");
 
         return MapToModel(brand);
     }
 
     public async Task<BrandModel> AddAsync(BrandCreateModel model, CancellationToken cancellationToken)
     {
+        if (string.IsNullOrWhiteSpace(model.Name))
+            throw new ArgumentException("Brand name must not be empty", nameof(model));
+
         var isUnique = await brandRepository.IsNameUniqueAsync(model.Name, cancellationToken);
         if (!isUnique)
-            throw new BrandNameNotUniqueException(model.Name);
+            throw new InvalidOperationException($"Brand name '{model.Name}' must be unique.");
 
         var brand = new Brand { Name = model.Name };
         await brandRepository.AddAsync(brand, cancellationToken);
@@ -37,11 +39,11 @@ public class BrandService(IBrandRepository brandRepository) : IBrandService
     public async Task<BrandModel> UpdateAsync(BrandUpdateModel model, CancellationToken cancellationToken)
     {
         var brand = await brandRepository.GetByIdAsync(model.Id, cancellationToken)
-                    ?? throw new BrandNotFoundException(model.Id);
+                    ?? throw new KeyNotFoundException($"Brand with ID {model.Id} not found.");
 
         var isUnique = await brandRepository.IsNameUniqueAsync(model.Name, cancellationToken);
         if (!isUnique)
-            throw new BrandNameNotUniqueException(model.Name);
+            throw new InvalidOperationException($"Brand name '{model.Name}' must be unique.");
 
         brand.Name = model.Name;
         await brandRepository.UpdateAsync(brand, cancellationToken);
@@ -52,7 +54,7 @@ public class BrandService(IBrandRepository brandRepository) : IBrandService
     public async Task DeleteAsync(int id, CancellationToken cancellationToken)
     {
         var brand = await brandRepository.GetByIdAsync(id, cancellationToken)
-                    ?? throw new BrandNotFoundException(id);
+                    ?? throw new KeyNotFoundException($"Brand with ID {id} not found.");
 
         await brandRepository.DeleteAsync(brand, cancellationToken);
     }
