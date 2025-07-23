@@ -1,18 +1,24 @@
-import { ApiError } from "@/app/api/drink-vending-machine/core/ApiError";
+import {ApiError} from "@/app/api/drink-vending-machine/core/ApiError";
 
 type ProblemDetails = {
-    type?: string;
     title?: string;
     status?: number;
+    detail?: string;
     instance?: string;
-    errorName?: string;
-    args?: Array<{ name: string; value: unknown }>;
 };
 
-export function isApiError(error: unknown, expectedErrorName: string): error is ApiError {
+export function isUnableToGiveChangeError(error: unknown): boolean {
     if (error instanceof ApiError) {
         const body = error.body as ProblemDetails;
-        return body?.errorName === expectedErrorName;
+        if (!body) return false;
+        if (
+            body.status === 400 &&
+            body.title === "Operation is not valid" &&
+            body.detail?.toLowerCase().includes("unable to give change")
+        ) {
+            return true;
+        }
     }
     return false;
 }
+

@@ -9,7 +9,7 @@ import {useRouter} from "next/navigation";
 import {OrderService} from "@/app/api/drink-vending-machine";
 import {Loading} from "@/components/ui/loading";
 import {useToast} from "@/components/ui/toast";
-import {isApiError} from "@/utils/is-api-error";
+import { isUnableToGiveChangeError } from "@/utils/is-api-error";
 
 export default function PaymentPage() {
     const router = useRouter();
@@ -58,7 +58,7 @@ export default function PaymentPage() {
             setIsPaid(true);
             router.push('/payment-success');
         } catch (error) {
-            if (isApiError(error, 'UnableToGiveChange')) {
+            if (isUnableToGiveChangeError(error)) {
                 showToast(
                     'Извините, в данный момент мы не можем продать вам товар по причине того, что автомат не может выдать вам нужную сдачу.',
                     'error'
@@ -66,8 +66,6 @@ export default function PaymentPage() {
             } else {
                 showToast('Ошибка при оплате, попробуйте ещё раз', 'error');
             }
-
-
         } finally {
             setLoading(false);
         }
