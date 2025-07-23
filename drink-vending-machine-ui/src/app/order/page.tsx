@@ -4,11 +4,12 @@ import {OrderItemRow} from '@/components/order/order-item-row';
 import {useOrderContext} from "@/context/order-context";
 import {useRouter} from "next/navigation";
 import {useToast} from "@/components/ui/toast";
+import {withOrderItemGuard} from "@/guards/with-order-item-guard";
 
-export default function OrderPage() {
+const OrderPage = () => {
     const router = useRouter();
     const {orderItems, total, changeQuantity, removeItem} = useOrderContext();
-    const { showToast } = useToast();
+    const {showToast} = useToast();
 
     const handleGoToPayment = () => {
         if (orderItems.length === 0) {
@@ -23,13 +24,13 @@ export default function OrderPage() {
             <h1 className="text-3xl font-bold mb-6 flex-shrink-0">Оформление заказа</h1>
 
             <div className="flex-shrink-0 pr-8 border-b border-gray-300 pb-4 mb-4">
-                <OrderItemRow isHeader />
+                <OrderItemRow isHeader/>
             </div>
 
             <section
                 aria-label="Список товаров в корзине"
                 className="flex-grow overflow-y-auto space-y-4 pr-4  min-h-[100px]"
-                style={{ scrollbarGutter: 'stable' }}
+                style={{scrollbarGutter: 'stable'}}
             >
                 {orderItems.length === 0 ? (
                     <p className="text-center text-gray-600 mt-4">Корзина пуста</p>
@@ -74,3 +75,5 @@ export default function OrderPage() {
         </div>
     );
 }
+
+export default withOrderItemGuard(OrderPage);
