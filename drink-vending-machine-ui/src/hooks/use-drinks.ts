@@ -33,20 +33,24 @@ export const useDrinks = (syncWithSelectedIds?: (ids: Set<number>) => void) => {
     };
 
     const fetchDrinks = async ({
-                                   brandId = selectedBrand,
-                                   minPrice = selectedRange[0],
-                                   maxPrice = selectedRange[1],
+                                   brandId,
+                                   minPrice,
+                                   maxPrice,
                                }: {
         brandId?: number | null;
         minPrice?: number;
         maxPrice?: number;
     } = {}) => {
+        const finalBrandId = brandId ?? selectedBrand;
+        const finalMinPrice = minPrice ?? selectedRange[0];
+        const finalMaxPrice = maxPrice ?? selectedRange[1];
+
         setLoading(true);
         try {
             const filteredDrinks = await DrinkService.getAllDrinks({
-                brandId: brandId || undefined,
-                minPrice,
-                maxPrice,
+                brandId: finalBrandId || undefined,
+                minPrice: finalMinPrice,
+                maxPrice: finalMaxPrice,
             });
             setDrinks(filteredDrinks);
         } catch (error) {

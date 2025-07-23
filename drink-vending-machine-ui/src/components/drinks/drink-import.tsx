@@ -1,47 +1,18 @@
 'use client';
 
-import {DrinkService} from "@/app/api/drink-vending-machine";
-import {ChangeEvent, useRef, useState} from "react";
-import {useToast} from "@/components/ui/toast";
+import {useDrinkImport} from "@/hooks/catalog/use-drink-import";
 
 interface Props {
     onImportSuccess?: () => void;
 }
 
 export const DrinkImport = ({onImportSuccess}: Props) => {
-    const fileInputRef = useRef<HTMLInputElement>(null);
-    const [uploading, setUploading] = useState(false);
-    const [error, setError] = useState<string | null>(null);
-    const { showToast } = useToast();
-
-    const handleFileChange = async (e: ChangeEvent<HTMLInputElement>) => {
-        const file = e.target.files?.[0];
-        if (!file) return;
-
-        setUploading(true);
-        setError(null);
-
-        try {
-            await DrinkService.importDrinksFromExcel({
-                formData: {file}
-            });
-
-            if (onImportSuccess) {
-                onImportSuccess();
-            }
-
-            if (fileInputRef.current) {
-                fileInputRef.current.value = "";
-            }
-
-            showToast("Импорт успешно завершён", "success");
-        } catch (e) {
-            console.error("Ошибка при импорте:", e);
-            showToast("Не удалось импортировать файл", "error");
-        } finally {
-            setUploading(false);
-        }
-    };
+    const {
+        uploading,
+        error,
+        fileInputRef,
+        handleImport
+    } = useDrinkImport(onImportSuccess);
 
     return (
         <div className="flex flex-col">
@@ -57,7 +28,7 @@ export const DrinkImport = ({onImportSuccess}: Props) => {
                 ref={fileInputRef}
                 accept=".xlsx,.xls"
                 className="hidden"
-                onChange={handleFileChange}
+                onChange={(e) => handleImport(e.target.files?.[0] || null)}
             />
             {error && <span className="text-red-500 text-sm mt-2">{error}</span>}
         </div>
