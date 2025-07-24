@@ -1,6 +1,6 @@
 'use client';
 
-import {useDrinks} from "@/hooks/use-drinks";
+import {useDrinks} from "@/hooks/catalog/use-drinks";
 import {DrinkFilters} from "@/components/drinks/drink-filter";
 import {DrinkList} from "@/components/drinks/drink-list";
 import {DrinkImport} from "@/components/drinks/drink-import";
