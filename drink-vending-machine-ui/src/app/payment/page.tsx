@@ -1,7 +1,7 @@
 'use client';
 
 import {useOrderContext} from "@/context/order-context";
-import {usePayment} from "@/hooks/use-payment";
+import {usePayment} from "@/hooks/payment/use-payment";
 import {CoinRow} from "@/components/payment/coin-row";
 import {PaymentSummary} from "@/components/payment/payment-summary";
 import {useEffect, useState} from "react";

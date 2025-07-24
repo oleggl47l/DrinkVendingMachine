@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { CoinWithCount } from "@/hooks/use-payment";
+import { CoinWithCount } from "@/hooks/payment/use-payment";
 
 interface CoinRowProps {
     coin: CoinWithCount;
