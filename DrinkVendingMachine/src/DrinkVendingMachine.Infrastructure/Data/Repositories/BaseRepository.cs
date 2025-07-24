@@ -18,7 +18,7 @@ public abstract class BaseRepository<T>(ApplicationDbContext context) : IReposit
         Func<IQueryable<T>, IQueryable<T>>? include = null,
         CancellationToken cancellationToken = default)
     {
-        var query = _dbSet.AsNoTracking().Where(predicate);
+        var query = _dbSet.Where(predicate);
 
         if (include is not null)
             query = include(query);
