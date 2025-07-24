@@ -1,50 +1,23 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
-import { CoinWithCount } from "@/hooks/payment/use-payment";
+import React from 'react';
+import {CoinWithCount} from "@/hooks/payment/use-payment";
+import {useCoinCount} from "@/hooks/payment/use-coin-count";
+import {getRubleWord} from "@/utils/get-ruble-word";
 
 interface CoinRowProps {
     coin: CoinWithCount;
     onChange: (id: number | undefined, delta: number) => void;
 }
 
-export const CoinRow = ({ coin, onChange }: CoinRowProps) => {
-    const [inputValue, setInputValue] = useState(String(coin.countSelected));
-
-    useEffect(() => {
-        setInputValue(String(coin.countSelected));
-    }, [coin.countSelected]);
-
-    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const value = e.target.value;
-
-        if (/^\d*$/.test(value)) {
-            setInputValue(value);
-
-            const parsed = parseInt(value, 10);
-            const newCount = isNaN(parsed) ? 0 : parsed;
-
-            const delta = newCount - coin.countSelected;
-            if (delta !== 0) {
-                onChange(coin.id, delta);
-            }
-        }
-    };
-
-    const handleBlur = () => {
-        const parsed = parseInt(inputValue, 10);
-        const safeValue = isNaN(parsed) ? 0 : parsed;
-
-        const delta = safeValue - coin.countSelected;
-        if (delta !== 0) {
-            onChange(coin.id, delta);
-        }
-
-        setInputValue(String(safeValue));
-    };
-
-    const increment = () => onChange(coin.id, 1);
-    const decrement = () => onChange(coin.id, -1);
+export const CoinRow = ({coin, onChange}: CoinRowProps) => {
+    const {
+        inputValue,
+        handleInputChange,
+        handleBlur,
+        increment,
+        decrement
+    } = useCoinCount(coin.countSelected, (delta) => onChange(coin.id, delta));
 
     return (
         <div className="grid grid-cols-[1fr_2fr_1fr] gap-4 items-center mb-8">
@@ -52,7 +25,7 @@ export const CoinRow = ({ coin, onChange }: CoinRowProps) => {
                 <div className="w-12 h-12 rounded-full border-2 border-gray-600 bg-gray-300 text-gray-800 flex items-center justify-center font-semibold text-lg">
                     {coin.nominal}
                 </div>
-                <span>{coin.nominal} {getRubleWord(coin.nominal)}</span>
+                <span>{coin.nominal} {getRubleWord(coin.nominal ?? 0)}</span>
             </div>
 
             <div className="flex justify-center items-center gap-2">
@@ -73,7 +46,7 @@ export const CoinRow = ({ coin, onChange }: CoinRowProps) => {
                     inputMode="numeric"
                     pattern="[0-9]*"
                     value={inputValue}
-                    onChange={handleInputChange}
+                    onChange={(e) => handleInputChange(e.target.value)}
                     onBlur={handleBlur}
                     className="w-16 h-8 text-center border rounded appearance-none"
                     aria-label={`Количество монет номиналом ${coin.nominal}`}
@@ -93,17 +66,8 @@ export const CoinRow = ({ coin, onChange }: CoinRowProps) => {
             </div>
 
             <div className="flex justify-center font-semibold">
-                {(coin.nominal || 0) * coin.countSelected} руб.
+                {(coin.nominal ?? 0) * coin.countSelected} руб.
             </div>
         </div>
     );
 };
-
-function getRubleWord(nominal?: number) {
-    if (!nominal) return 'руб.';
-    const last = nominal % 10;
-    const lastTwo = nominal % 100;
-    if (last === 1 && lastTwo !== 11) return 'рубль';
-    if ([2, 3, 4].includes(last) && ![12, 13, 14].includes(lastTwo)) return 'рубля';
-    return 'рублей';
-}
