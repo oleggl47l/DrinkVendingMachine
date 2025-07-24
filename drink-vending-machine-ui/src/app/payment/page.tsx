@@ -2,74 +2,22 @@
 
 import {useOrderContext} from "@/context/order-context";
 import {usePayment} from "@/hooks/payment/use-payment";
-import {CoinRow} from "@/components/payment/coin-row";
 import {PaymentSummary} from "@/components/payment/payment-summary";
-import {useEffect, useState} from "react";
-import {useRouter} from "next/navigation";
-import {OrderService} from "@/app/api/drink-vending-machine";
-import {Loading} from "@/components/ui/loading";
-import {useToast} from "@/components/ui/toast";
-import { isUnableToGiveChangeError } from "@/utils/is-api-error";
+import {useState} from "react";
+import {usePaymentHandler} from "@/hooks/payment/use-payment-handler";
+import {usePaymentRedirect} from "@/hooks/payment/use-payment-redirect";
+import {PaymentControls} from "@/components/payment/payment-controls";
+import {CoinList} from "@/components/payment/coin-list";
 
 export default function PaymentPage() {
-    const router = useRouter();
-    const {total: orderTotal, orderItems, isHydrated, removeItem} = useOrderContext();
+    const {total: orderTotal, orderItems, isHydrated} = useOrderContext();
     const {coins, totalInserted, changeCount, isLoaded} = usePayment();
-    const [loading, setLoading] = useState(false);
     const [isPaid, setIsPaid] = useState(false);
-    const { showToast } = useToast();
 
-    useEffect(() => {
-        if (!isHydrated) return;
-        if (orderItems.length === 0 && !isPaid) {
-            router.replace('/catalog');
-        }
-    }, [orderItems, isHydrated, router, isPaid]);
+    const {handlePayment, isEnough, loading} = usePaymentHandler(coins, totalInserted);
+    usePaymentRedirect(isPaid);
 
-    if (!isHydrated || orderItems.length === 0) {
-        return null;
-    }
-
-    const isEnough = totalInserted >= orderTotal;
-
-    const handlePayment = async () => {
-        setLoading(true);
-        try {
-            const orderCreateModel = {
-                items: orderItems.map(item => ({
-                    drinkId: item.id,
-                    quantity: item.quantitySelected,
-                })),
-                coinsInserted: coins
-                    .filter(c => c.countSelected > 0)
-                    .map(c => ({
-                        id: c.id,
-                        quantity: c.countSelected,
-                    })),
-            };
-
-            const result = await OrderService.createOrder({requestBody: orderCreateModel});
-
-            orderItems.forEach(item => removeItem(item.id!));
-
-            sessionStorage.setItem('paymentChangeAmount', String(result.changeAmount ?? 0));
-            sessionStorage.setItem('paymentChangeCoins', JSON.stringify(result.change ?? {}));
-
-            setIsPaid(true);
-            router.push('/payment-success');
-        } catch (error) {
-            if (isUnableToGiveChangeError(error)) {
-                showToast(
-                    'Извините, в данный момент мы не можем продать вам товар по причине того, что автомат не может выдать вам нужную сдачу.',
-                    'error'
-                );
-            } else {
-                showToast('Ошибка при оплате, попробуйте ещё раз', 'error');
-            }
-        } finally {
-            setLoading(false);
-        }
-    };
+    if (!isHydrated || orderItems.length === 0) return null;
 
     return (
         <div className="container mx-auto px-4 py-8 flex flex-col h-[100vh] max-h-[100vh]">
@@ -83,19 +31,7 @@ export default function PaymentPage() {
                 </section>
             </div>
 
-            <section
-                className="flex-grow overflow-y-auto space-y-4 pr-4 min-h-[100px]"
-                style={{ scrollbarGutter: 'stable' }}
-                aria-label="Монеты для оплаты"
-            >
-                {!isLoaded ? (
-                    <Loading />
-                ) : (
-                    coins.map(coin => (
-                        <CoinRow key={coin.id} coin={coin} onChange={changeCount}/>
-                    ))
-                )}
-            </section>
+            <CoinList coins={coins} changeCount={changeCount} isLoaded={isLoaded}/>
 
             <div className="mt-auto border-t border-gray-300 pt-6">
                 <div className="flex justify-end mb-8">
@@ -106,21 +42,14 @@ export default function PaymentPage() {
                     />
                 </div>
 
-                <div className="flex justify-between">
-                    <button
-                        onClick={() => window.history.back()}
-                        className="bg-yellow-400 text-black hover:bg-yellow-500 px-20 py-3 rounded"
-                    >
-                        Вернуться
-                    </button>
-                    <button
-                        onClick={handlePayment}
-                        disabled={!isEnough || loading}
-                        className="bg-green-600 text-white hover:bg-green-700 px-20 py-3 rounded disabled:opacity-50"
-                    >
-                        {loading ? 'Оплата...' : 'Оплатить'}
-                    </button>
-                </div>
+                <PaymentControls
+                    loading={loading}
+                    isEnough={isEnough}
+                    onPay={async () => {
+                        setIsPaid(true);
+                        await handlePayment();
+                    }}
+                />
             </div>
         </div>
     );
