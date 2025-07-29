@@ -1,18 +1,17 @@
 'use client';
 
-import React, { useEffect } from 'react';
-import { useOrderContext } from '@/context/order-context';
-import { useRouter } from 'next/navigation';
-import type { JSX } from 'react';
+import React from 'react';
+import {useOrderContext} from '@/context/order-context';
+import {useRouter} from 'next/navigation';
 
-export function withOrderItemGuard<P extends JSX.IntrinsicAttributes>(
+export function withOrderItemGuard<P extends object>(
     WrappedComponent: React.ComponentType<P>
 ) {
     return function GuardedComponent(props: P) {
-        const { orderItems, isHydrated } = useOrderContext();
+        const {orderItems, isHydrated} = useOrderContext();
         const router = useRouter();
 
-        useEffect(() => {
+        React.useEffect(() => {
             if (!isHydrated) return;
             if (orderItems.length === 0) {
                 router.replace('/catalog');
